@@ -1,0 +1,46 @@
+{
+  "_from": "get-pixel-screen",
+  "_id": "get-pixel-screen@1.0.8",
+  "_inBundle": false,
+  "_integrity": "sha512-5B0qiPtA1k2bwoL/3i4Sj15bSVG8XYnS8bmVSQrYP0665OcJrz3o/rsmUwWrW3NUTxz5++oyctSgQHh2o6IBBg==",
+  "_location": "/get-pixel-screen",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "get-pixel-screen",
+    "name": "get-pixel-screen",
+    "escapedName": "get-pixel-screen",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/get-pixel-screen/-/get-pixel-screen-1.0.8.tgz",
+  "_shasum": "ed5856485701a0f09edad8fe6839ee3bab8ba2b1",
+  "_spec": "get-pixel-screen",
+  "_where": "C:\\Users\\techno11\\Documents\\Github\\HCSVistaRemote\\src_backend",
+  "author": {
+    "name": "Théodore Prévot"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Get the desired pixel color on a Windows screen",
+  "gypfile": true,
+  "keywords": [
+    "pixel",
+    "screen",
+    "Windows",
+    "color"
+  ],
+  "license": "ISC",
+  "main": "./build/release/getPixel.node",
+  "name": "get-pixel-screen",
+  "scripts": {
+    "install": "node-gyp rebuild"
+  },
+  "version": "1.0.8"
+}
