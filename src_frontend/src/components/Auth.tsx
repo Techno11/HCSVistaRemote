@@ -1,24 +1,26 @@
 import * as React from 'react';
 import {Box, Button, TextField, Typography} from "@mui/material";
-import {Socket} from "socket.io-client";
 import {useState} from "react";
-import * as api from "../common/socket";
+import {useVista} from "../hooks/useVista";
 
 interface IProps {
-  socket: Socket
+  callback: (auth: boolean) => void
 }
 
 export default function Auth(props: IProps) {
 
-  const {socket} = props;
+  const {callback} = props;
+
+  const vista = useVista();
 
   const [key, setKey] = useState<string>("");
 
   const onSubmit = () => {
-    api.socketAuth(socket, key).then((success) => {
+    vista.socketAuth(key).then((success) => {
       if(success) {
         localStorage.setItem("authkey", key);
       }
+      callback(success);
     }).catch(() => {
 
     })

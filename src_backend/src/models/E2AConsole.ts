@@ -70,7 +70,7 @@ class E2AConsole {
     // Update Fader Position
     this.faderStates[fader] = percent;
     // Reset position to start position
-    robot.moveMouse(startPos.x, startPos.y);
+    // robot.moveMouse(startPos.x, startPos.y);
   }
 
   /**

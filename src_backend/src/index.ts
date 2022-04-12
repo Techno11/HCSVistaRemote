@@ -5,7 +5,6 @@ import * as ScreenMachine from "./ScreenMachine";
 import * as VistaSerial from "./VistaSerial";
 import * as ConnectionManager from "./ConnectionManager"
 import LightBoard from "./constants/LightBoard";
-import CuestackTrigger from "./models/CuestackTrigger";
 
 const app = express();
 /* middleware */
@@ -21,10 +20,12 @@ const io = new SocketServer(server, {
 
 // Setup Socket Connector
 io.on('connection', async (client: Socket) => {
-  let clientAuthString = "";
-  let authed = false;
+  let clientAuthString = {code: ''};
+  const ua = client.request.headers["user-agent"];
+  const ip = client.handshake.address;
 
   client.on('disconnect', () => {
+    ConnectionManager.onDisconnect(clientAuthString.code);
     client.disconnect();
   });
 
@@ -34,14 +35,13 @@ io.on('connection', async (client: Socket) => {
 
   // Client can check if they're authed
   client.on('authed', () => {
-    client.emit('authed-response', {auth: authed});
+    client.emit('authed-response', {auth: ConnectionManager.isAuthed(clientAuthString.code, ua, ip)});
   });
 
   // Client can register themselves and request an auth token
   client.on('request-auth', () => {
-    const ua = client.request.headers["user-agent"];
-    if(ua) {
-      clientAuthString = ConnectionManager.auth(ua);
+    if (ua) {
+      clientAuthString.code = ConnectionManager.requestAuth(ua, ip);
       client.emit('request-auth-response', {ready: true})
     } else {
       client.emit('request-auth-response', {ready: false, error: "Invalid Request"})
@@ -50,42 +50,35 @@ io.on('connection', async (client: Socket) => {
 
   // client submitting their auth toke for verification
   client.on('auth', (code) => {
-    const ua = client.request.headers["user-agent"];
-    if(ua) {
-      authed = ConnectionManager.connect(code, ua);
-      if(authed) {
+    if (ua && clientAuthString.code === code) {
+      const authed = ConnectionManager.onAuth(code, ua, ip);
+      if (authed) {
         client.emit('auth-response', {auth: true})
       } else {
         client.emit('auth-response', {auth: false, error: "Invalid Code"})
       }
     } else {
-      client.emit('auth-response', {auth: false, error: "Invalid Request"})
+      client.emit('auth-response', {auth: false, error: "Invalid Request or Incorrect Key"})
     }
   })
 
-  client.on('go', (raw: string) => {
-    if(!authed) {
+  client.on('go', (cues: string) => {
+    if (!ConnectionManager.isAuthed(clientAuthString.code, ua, ip)) {
       client.emit('go-response', {success: false, error: "Not Authorized"})
       return;
     }
-    if(!ScreenMachine.ready) {
+    if (!ScreenMachine.ready) {
       client.emit('go-response', {success: false, error: "Not Ready"})
     } else {
-      // Parse JSON
-      try {
-        const cues = JSON.parse(raw);
-        if(Array.isArray(cues)) {
-          // Set consoles
-          ScreenMachine.go(cues);
-          // Once the consoles are set, we can tell vista to go
-          VistaSerial.go(cues);
-          // Emit Successful
-          client.emit('go-response', {success: true})
-        } else {
-          client.emit('go-response', {success: false, error: "Invalid Data"})
-        }
-      } catch {
-        client.emit('go-response', {success: false, error: "Unparsable Data"})
+      if (Array.isArray(cues)) {
+        // Set consoles
+        ScreenMachine.go(cues);
+        // Once the consoles are set, we can tell vista to go
+        VistaSerial.go(cues);
+        // Emit Successful
+        client.emit('go-response', {success: true})
+      } else {
+        client.emit('go-response', {success: false, error: "Invalid Data"})
       }
     }
   })

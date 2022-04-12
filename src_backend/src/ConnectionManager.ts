@@ -1,30 +1,36 @@
 // Connection manager is a primative memory database that manages how many connections once connection code can have
 
-// TODO: clean up old auths?
+interface ClientAuth {
+  authenticated: boolean,
+  user_agent: string,
+  ip: string,
+  timeout: NodeJS.Timeout,
+}
 
-const connections = {} as {[key: string]: { connected: boolean, user_agent: string, timeout: NodeJS.Timeout }};
+const connections = {} as {[key: string]: ClientAuth};
 
 /**
  * Disconnect marks a user as disconnected
  * @param code code to disconnect
  */
-function disconnect(code: string) {
-  connections[code].connected = false;
-  connections[code].timeout = setTimeout(() => {
-    console.log("A client has disconnected. Their code will be clear in 1 hour!")
-    delete connections[code];
-  }, 60 * 60 * 1000);
+function onDisconnect(code: string) {
+  if(connections[code]) {
+    connections[code].timeout = setTimeout(() => {
+      delete connections[code];
+    }, 1000 * 60 * 60);
+  }
 }
 
 /**
- * Connect checks if the connection code is active already, and check if we're clear to connect
+ * Checks if the connection code is active already, and check if we're clear to authenticate
  * @param code Connection code
  * @param userAgent Connection user agent
+ * @param ip Connection ip address
  */
-function connect(code: string, userAgent: string): boolean {
-  if(connections[code] && !connections[code].connected && connections[code].user_agent === userAgent) {
+function onAuth(code: string, userAgent: string, ip: string): boolean {
+  if(connections[code] && connections[code].user_agent === userAgent && connections[code].ip === ip) {
     // Mark Connection as connected
-    connections[code].connected = true;
+    connections[code].authenticated = true;
     // Clear Timeout
     if(connections[code].timeout) clearTimeout(connections[code].timeout);
     return true;
@@ -34,15 +40,17 @@ function connect(code: string, userAgent: string): boolean {
 }
 
 /**
- * Auth generates an authorization code for a new connection
+ * Generate an authorization code for a new connection
  * @param userAgent Connection user agent
+ * @param ip Connection ip address
  */
-function auth(userAgent: string): string {
+function requestAuth(userAgent: string, ip: string): string {
   const newCode = getConnectionCode();
   console.log(`New Connection, Authorization Code is '${newCode}'. Code is active for 30 seconds!`)
   connections[newCode] = {
-    connected: false,
+    authenticated: false,
     user_agent: userAgent,
+    ip: ip,
 
     // Clear auth token if not used in 30 seconds
     timeout: setTimeout(() => {
@@ -51,6 +59,16 @@ function auth(userAgent: string): string {
     }, 30 * 1000)
   }
   return newCode;
+}
+
+/**
+ * Returns is code is authorized or not
+ * @param code code to check
+ * @param ua user agent of requesting user
+ * @param ip ip address of requesting user
+ */
+function isAuthed(code: string, ua: string | undefined, ip: string | undefined) {
+  return connections[code] && connections[code].ip === ip && connections[code].user_agent === ua && connections[code].authenticated;
 }
 
 /**
@@ -67,7 +85,8 @@ function getConnectionCode(): string {
 }
 
 export {
-  connect,
-  disconnect,
-  auth
+  requestAuth,
+  onDisconnect,
+  onAuth,
+  isAuthed
 }

@@ -1,22 +1,20 @@
 import * as React from 'react';
 import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import ProTip from './ProTip';
 import {useEffect, useState} from "react";
-import {io} from "socket.io-client";
-import * as api from "./common/socket";
 import Auth from "./components/Auth";
+import AuthedComponent from "./components/AuthedComponent";
+import VistaSocket from "./common/VistaSocket";
+import {useVista} from "./hooks/useVista";
 
 export default function App() {
 
-  const client = io(location.hostname + ":8008");
-
   const [authed, setAuthed] = useState<boolean>(false);
+
+  const vista = useVista();
 
   useEffect(() => {
     // Check if we're authed
-    api.socketAuthed(client).then(authed => {
+    vista.socketAuthed().then(authed => {
       if(authed) { // We're ready
         setAuthed(true);
       } else { // No beans, we're not authed
@@ -24,36 +22,29 @@ export default function App() {
         const oldKey = localStorage.getItem("authkey");
         if(oldKey) {
           // if we have a key from local storage, try authenticating it
-          return api.socketAuth(client, oldKey).then(success => {
+          return vista.socketAuth(oldKey).then(success => {
             if(!success) { // if we fail, request a new key
-              return api.socketRequestAuth(client);
+              return vista.socketRequestAuth();
             }
           })
         } else { // no key in local storage, just request a new key
-          return api.socketRequestAuth(client)
+          return vista.socketRequestAuth()
         }
       }
     }).catch((err) => {
       console.log("Error in initial auth flow: ", err)
     })
-
-    // Register listener listening for auth responses
-    client.on("auth-response", (json: any) => {
-      setAuthed(json.auth);
-    });
   }, [])
 
   return (
-    <Container maxWidth="sm">
+    <Container sx={{minHeight: '100vh', minWidth: '100vw', maxHeight: '100vh', maxWidth: '100vw', overflow: 'hidden'}}>
       {!authed &&
-        <Auth socket={client} />
+        <Auth callback={(auth: boolean) => setAuthed(auth)} />
       }
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Create React App example with TypeScript
-        </Typography>
-        <ProTip />
-      </Box>
+
+      {authed &&
+        <AuthedComponent />
+      }
     </Container>
   );
 }

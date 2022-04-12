@@ -26,7 +26,7 @@ function setup(port: string) {
   })
 
   vistaSerial.on("data", (data) => {
-    // console.error("Vista Data: ", data.toString())
+    // console.log("Vista Data: ", data.toString())
   })
 
   vistaSerial.on("open", () => {
