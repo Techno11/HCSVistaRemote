@@ -88,7 +88,7 @@ function resetAllFaders() {
  */
 function go(commands: CuestackTrigger[]) {
   for(const command of commands) {
-    const board = command.cuestack.console;
+    const board = command.cuestack.console - 1;
     const boardPos = command.cuestack.position;
     const intensity = command.intensity;
     consoles[board].commandFader(boardPos, intensity);

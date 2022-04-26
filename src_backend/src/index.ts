@@ -50,7 +50,7 @@ io.on('connection', async (client: Socket) => {
 
   // client submitting their auth toke for verification
   client.on('auth', (code) => {
-    if (ua && clientAuthString.code === code) {
+    if (ua) {
       const authed = ConnectionManager.onAuth(code, ua, ip);
       if (authed) {
         client.emit('auth-response', {auth: true})

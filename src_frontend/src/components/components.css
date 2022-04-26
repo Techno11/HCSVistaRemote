@@ -1,0 +1,17 @@
+@keyframes border-blink-red {
+    from, to {
+        border-color: transparent
+    }
+    50% {
+        border-color: red
+    }
+}
+
+@keyframes border-blink-green {
+    from, to {
+        border-color: transparent
+    }
+    50% {
+        border-color: green
+    }
+}

@@ -25,6 +25,8 @@ export default function App() {
           return vista.socketAuth(oldKey).then(success => {
             if(!success) { // if we fail, request a new key
               return vista.socketRequestAuth();
+            } else {
+              setAuthed(true);
             }
           })
         } else { // no key in local storage, just request a new key

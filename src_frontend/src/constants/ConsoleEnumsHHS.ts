@@ -1,7 +1,7 @@
 import Cuestack from "../models/Cuestack";
 import Color from "../models/Color";
-import WashType from "../models/Wash";
 import BOType from "../models/BO";
+import WashZone from "../models/WashZone";
 
 const board = {
   // Console 1, Top Bank
@@ -39,7 +39,7 @@ const board = {
   CYC_PURPLE_SPAZZY:  {console: 2, position: 8, number: 28, name: "Cyc Purple Spazzy" } as Cuestack,
   CYC_POTY :          {console: 2, position: 9, number: 29, name: "Cyc POTY" } as Cuestack,
   // Console 2, Lower Bank
-  BABY:           {console: 2, position: 10, number: 140, name: "Baby Lights" } as Cuestack,
+  WASH:           {console: 2, position: 10, number: 30, name: "Wash" } as Cuestack,
   DS_CTR:         {console: 2, position: 11, number: 31, name: "DS Center" } as Cuestack,
   MS_CTR:         {console: 2, position: 12, number: 32, name: "MS Center" } as Cuestack,
   US_CTR:         {console: 2, position: 13, number: 115, name: "US Center" } as Cuestack,
@@ -48,7 +48,7 @@ const board = {
   BO_CUT:         {console: 2, position: 16, number: 51, name: "Cut Blackout" } as Cuestack,
   BO_5:           {console: 2, position: 17, number: 52, name: "5s Blackout" } as Cuestack,
   BO_10:          {console: 2, position: 18, number: 53, name: "10s Blackout" } as Cuestack,
-  UNUSED:         {console: 2, position: 19, number: 54, name: "UNUSED" } as Cuestack,
+  BABY:           {console: 2, position: 19, number: 110, name: "Baby Lights" } as Cuestack,
 
   // Console 3, Upper Bank
   SKY:          {console: 3, position: 0, number: 8, name: "Sky Lights" } as Cuestack,
@@ -72,7 +72,7 @@ const board = {
   ZONE_7: {console: 3, position: 16, number: 107, name: "Zone 7" } as Cuestack,
   ZONE_8: {console: 3, position: 17, number: 108, name: "Zone 8" } as Cuestack,
   ZONE_9: {console: 3, position: 18, number: 109, name: "Zone 9" } as Cuestack,
-  WASH:   {console: 3, position: 19, number: 30, name: "Wash" } as Cuestack,
+  UNUSED: {console: 3, position: 19, number: 110, name: "UNUSED" } as Cuestack,
 }
 
 function cyc(color: Color): Cuestack {
@@ -117,26 +117,6 @@ function stage(color: Color): Cuestack {
   }
 }
 
-function wash(mode: WashType) {
-  switch(mode) {
-    case WashType.WASH: return board.WASH;
-    case WashType.FRONT_MIDS: return board.FRONT_MIDS;
-    case WashType.DS_CENTER: return board.DS_CTR;
-    case WashType.MS_CENTER: return board.MS_CTR;
-    case WashType.US_CENTER: return board.US_CTR;
-    case WashType.Z1: return board.ZONE_1;
-    case WashType.Z2: return board.ZONE_2;
-    case WashType.Z3: return board.ZONE_3;
-    case WashType.Z4: return board.ZONE_4;
-    case WashType.Z5: return board.ZONE_5;
-    case WashType.Z6: return board.ZONE_6;
-    case WashType.Z7: return board.ZONE_7;
-    case WashType.Z8: return board.ZONE_8;
-    case WashType.Z9: return board.ZONE_9;
-    default: return board.WASH;
-  }
-}
-
 function bo(mode: BOType) {
   switch(mode) {
     case BOType.Cut: return board.BO_CUT
@@ -144,6 +124,24 @@ function bo(mode: BOType) {
     case BOType.Five: return board.BO_5
     case BOType.Ten: return board.BO_10
     default: return board.BO_2;
+  }
+}
+
+function wash(zone: WashZone): Cuestack {
+  switch(zone) {
+    case "z1": return board.ZONE_1;
+    case "z2": return board.ZONE_2;
+    case "z3": return board.ZONE_3;
+    case "z4": return board.ZONE_4;
+    case "z5": return board.ZONE_5;
+    case "z6": return board.ZONE_6;
+    case "z7": return board.ZONE_7;
+    case "z8": return board.ZONE_8;
+    case "z9": return board.ZONE_9;
+    case "UsSp": return board.US_CTR;
+    case "MsSp": return board.MS_CTR;
+    case "DsSp": return board.DS_CTR;
+    case "wash": return board.WASH;
   }
 }
 

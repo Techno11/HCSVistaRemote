@@ -28,7 +28,8 @@ export default function ColorSelector(props: IProps) {
     {value: 100, label: '100%'},
   ]
 
-  const onColorChange = (val: Color) => {
+  const onColorChange = (event: React.MouseEvent<HTMLAnchorElement> | React.MouseEvent<HTMLButtonElement>, val: Color) => {
+    event.preventDefault();
     onChange({color: val, intensity: intensity});
   }
 
@@ -50,7 +51,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.RED) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.RED)}
+              onClick={(e) => onColorChange(e, Color.RED)}
             >
               Red
             </Button>
@@ -61,7 +62,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.GREEN) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.GREEN)}
+              onClick={(e) => onColorChange(e, Color.GREEN)}
             >
               Green
             </Button>
@@ -72,7 +73,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.BLUE) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.BLUE)}
+              onClick={(e) => onColorChange(e, Color.BLUE)}
             >
               Blue
             </Button>
@@ -83,7 +84,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'black',
                 border: (color === Color.PINK) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.PINK)}
+              onClick={(e) => onColorChange(e, Color.PINK)}
             >
               Pink
             </Button>
@@ -94,7 +95,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'black',
                 border: (color === Color.YELLOW) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.YELLOW)}
+              onClick={(e) => onColorChange(e, Color.YELLOW)}
             >
               Yellow
             </Button>
@@ -105,7 +106,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.TEAL) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.TEAL)}
+              onClick={(e) => onColorChange(e, Color.TEAL)}
             >
               Teal
             </Button>
@@ -116,7 +117,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.MAGENTA) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.MAGENTA)}
+              onClick={(e) => onColorChange(e, Color.MAGENTA)}
             >
               Magenta
             </Button>
@@ -127,7 +128,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.PURPLE) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.PURPLE)}
+              onClick={(e) => onColorChange(e, Color.PURPLE)}
             >
               Purple
             </Button>
@@ -138,7 +139,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'black',
                 border: (color === Color.ORANGE) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.ORANGE)}
+              onClick={(e) => onColorChange(e, Color.ORANGE)}
             >
               Orange
             </Button>
@@ -149,14 +150,14 @@ export default function ColorSelector(props: IProps) {
                 color: 'black',
                 border: (color === Color.WHITE) ? "4px solid black !important" : "2px solid lightgrey"
               }}
-              onClick={() => onColorChange(Color.WHITE)}
+              onClick={(e) => onColorChange(e, Color.WHITE)}
             >
               White
             </Button>
             <Button
               disabled={color === Color.OFF}
               sx={{backgroundColor: 'black', color: 'white', width: 1}}
-              onClick={() => onColorChange(Color.OFF)}
+              onClick={(e) => onColorChange(e, Color.OFF)}
             >
               Off
             </Button>
@@ -172,7 +173,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.RAINBOW) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.RAINBOW)}
+              onClick={(e) => onColorChange(e, Color.RAINBOW)}
             >
               Rainbow
             </Button>
@@ -183,7 +184,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.RB) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.RB)}
+              onClick={(e) => onColorChange(e, Color.RB)}
             >
               R | B
             </Button>
@@ -194,7 +195,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.TWINKLE) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.TWINKLE)}
+              onClick={(e) => onColorChange(e, Color.TWINKLE)}
             >
               Twinkle
             </Button>
@@ -205,7 +206,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'black',
                 border: (color === Color.ROYGBIV) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.ROYGBIV)}
+              onClick={(e) => onColorChange(e, Color.ROYGBIV)}
             >
               ROYGBIV
             </Button>
@@ -216,7 +217,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'black',
                 border: (color === Color.SPAZZY) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.SPAZZY)}
+              onClick={(e) => onColorChange(e, Color.SPAZZY)}
             >
               Spazzy
             </Button>
@@ -227,7 +228,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.RSPAZZY) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.RSPAZZY)}
+              onClick={(e) => onColorChange(e, Color.RSPAZZY)}
             >
               R Spazzy
             </Button>
@@ -238,7 +239,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.GSPAZZY) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.GSPAZZY)}
+              onClick={(e) => onColorChange(e, Color.GSPAZZY)}
             >
               G Spazzy
             </Button>
@@ -249,7 +250,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.BSPAZZY) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.BSPAZZY)}
+              onClick={(e) => onColorChange(e, Color.BSPAZZY)}
             >
               B Spazzy
             </Button>
@@ -260,7 +261,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.PSPAZZY) ? "4px solid black !important" : ""
               }}
-              onClick={() => onColorChange(Color.PSPAZZY)}
+              onClick={(e) => onColorChange(e, Color.PSPAZZY)}
             >
               P Spazzy
             </Button>
@@ -271,7 +272,7 @@ export default function ColorSelector(props: IProps) {
                 color: 'white',
                 border: (color === Color.POTY) ? "4px solid black !important" : "2px solid lightgrey"
               }}
-              onClick={() => onColorChange(Color.POTY)}
+              onClick={(e) => onColorChange(e, Color.POTY)}
             >
               POTY
             </Button>
@@ -283,7 +284,6 @@ export default function ColorSelector(props: IProps) {
             <Grid item xs={11} sx={{height: '100%', pb: 2}}>
               <Slider
                 sx={{height: '100%'}}
-                aria-label="Temperature"
                 orientation="vertical"
                 value={intensity}
                 marks={marks}
@@ -296,6 +296,7 @@ export default function ColorSelector(props: IProps) {
                 variant={"standard"}
                 sx={{px: 2}}
                 value={intensity}
+                onChange={e => onIntensityChange(parseInt(e.target.value))}
                 inputProps={{min: 0, max: 100}}
               />
             </Grid>
