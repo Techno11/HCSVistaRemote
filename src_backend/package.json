@@ -5,7 +5,9 @@
   "main": "build/index.js",
   "scripts": {
     "dev": "tsc && npm start",
-    "start": "node build/index.js"
+    "start": "node build/index.js",
+    "build": "tsc",
+    "build-bin": "pkg ."
   },
   "repository": {
     "type": "git",
@@ -27,6 +29,7 @@
     "express": "^4.17.3",
     "get-pixel-screen": "file:../get-pixel-screen",
     "iohook": "^0.6.6",
+    "pkg": "^5.6.0",
     "prompt-sync": "^4.2.0",
     "robotjs": "git+https://github.com/octalmage/robotjs.git",
     "serialport": "^10.4.0",
@@ -37,5 +40,17 @@
     "@types/dialog-node": "^0.2.0",
     "@types/express": "^4.17.13",
     "@types/prompt-sync": "^4.1.1"
+  },
+  "bin": "build/index.js",
+  "pkg": {
+    "assets": [
+      "public/**/*",
+      "node_modules/iohook/**/*",
+      "node_modules/@serialport/**/*"
+    ],
+    "targets": [
+      "node14-win"
+    ],
+    "outputPath": "../bin"
   }
 }

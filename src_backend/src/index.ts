@@ -1,14 +1,24 @@
 import * as http from 'http';
 import {Server as SocketServer, Socket} from 'socket.io';
-import express from 'express';
+import express, { Application, Request, Response, NextFunction } from 'express';
 import * as ScreenMachine from "./ScreenMachine";
 import * as VistaSerial from "./VistaSerial";
 import * as ConnectionManager from "./ConnectionManager"
 import LightBoard from "./constants/LightBoard";
+import * as path from 'path';
 
 const app = express();
-/* middleware */
+
+// Send Frontend
+app.use(express.static(path.resolve(__dirname, '../public')));
+app.use((req: Request, res: Response) => {
+  res.sendFile(path.resolve(__dirname, '../public/index.html'));
+});
+
+// HTTP Server Setup
 const server = http.createServer(app);
+
+// Socket server setup
 const io = new SocketServer(server, {
   cors: {
     origin: '*',

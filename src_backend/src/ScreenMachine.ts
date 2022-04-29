@@ -1,9 +1,8 @@
 import E2AConsole from "./models/E2AConsole";
 import LightBoard, {LightBoardNames} from "./constants/LightBoard";
-import robot from 'robotjs';
 import CuestackTrigger from "./models/CuestackTrigger";
 import {waitSync} from "./common";
-const iohook = require('iohook');
+import iohook from "iohook"
 const prompt = require('prompt-sync')();
 
 let boardType = LightBoard.HHS;

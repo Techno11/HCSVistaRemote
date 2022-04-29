@@ -3,7 +3,6 @@ import Container from '@mui/material/Container';
 import {useEffect, useState} from "react";
 import Auth from "./components/Auth";
 import AuthedComponent from "./components/AuthedComponent";
-import VistaSocket from "./common/VistaSocket";
 import {useVista} from "./hooks/useVista";
 
 export default function App() {

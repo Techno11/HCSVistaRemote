@@ -108,3 +108,9 @@ build/
 
 # Intelij Idea
 .idea/
+
+# Built React App
+src_backend/public/
+
+# Built Binaries
+bin/

@@ -1,0 +1,29 @@
+{
+  "name": "hcsvistaremote",
+  "version": "0.0.1",
+  "description": "Remote Control for HCS's JANDS vista instances",
+  "main": " ",
+  "scripts": {
+    "build-frontend": "cd src_frontend/ && npm run build && cd ../",
+    "build-backend": "cd src_backend/ && npm run build && cd ../",
+    "build-all": "npm run build-frontend && npm run build-backend",
+    "move-built-frontend": "npx copy src_frontend/build/*/** src_backend/public",
+    "bin-win": "cd src_backend && npm run build-bin && cd ../",
+    "build-binary-win": "npm run build-all && npm run move-built-frontend && npm run bin-win"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Techno11/HCSVistaRemote.git"
+  },
+  "keywords": [
+    "jands",
+    "vista",
+    "hcs"
+  ],
+  "author": "Soren Zaiser",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/Techno11/HCSVistaRemote/issues"
+  },
+  "homepage": "https://github.com/Techno11/HCSVistaRemote#readme"
+}
