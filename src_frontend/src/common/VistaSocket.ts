@@ -48,7 +48,11 @@ export default class VistaSocket {
     }))
   }
 
-  public socketGo(cues: CuestackTrigger[]): Promise<boolean> {
+  /**
+   * Command a sequence of cues to execute
+   * @param cues cues to execute
+   */
+  public go(cues: CuestackTrigger[]): Promise<boolean> {
     return new Promise((resolve, reject) => {
       if(Date.now() - this._lastReq >  rateLimit) {
         this._socket.on("go-response", json => {
@@ -59,6 +63,58 @@ export default class VistaSocket {
       } else {
         reject();
       }
+    })
+  }
+
+  /**
+   * Request the system status
+   */
+  public status(): Promise<{serial_status: boolean, board_status: boolean}> {
+    return new Promise((resolve, reject) => {
+      this._socket.on("setup-status-response", json => {
+        if(json.success) resolve(json);
+        else reject();
+      })
+      this._socket.emit("setup-status");
+    })
+  }
+
+  /**
+   * Trigger a console setup
+   */
+  public setupBoard(boardNum: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this._socket.on("setup-board-response", json => {
+        if(json.success) resolve();
+        else reject(json.error);
+      })
+      this._socket.emit("setup-board", {board_num: boardNum});
+    })
+  }
+
+  /**
+   * Trigger the calibration
+   */
+  public calibrateBoards(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this._socket.on("config-board-response", json => {
+        if(json.success) resolve();
+        else reject(json.error);
+      })
+      this._socket.emit("config-board");
+    })
+  }
+
+  /**
+   * Trigger the serial configuration
+   */
+  public setupSerial(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this._socket.on("setup-serial-response", json => {
+        if(json.success) resolve();
+        else reject(json.error);
+      })
+      this._socket.emit("setup-serial");
     })
   }
 }

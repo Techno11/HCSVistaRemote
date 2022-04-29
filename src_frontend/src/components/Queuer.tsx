@@ -88,7 +88,7 @@ export default function Queuer() {
 
   const goCues = (queue: CuestackTrigger[]) => {
     if(queue.length > 0) {
-      vista.socketGo(queue).then(success => {
+      vista.go(queue).then(success => {
         if(success) {
           // do nothing?
         } else {
@@ -109,7 +109,7 @@ export default function Queuer() {
     if(live) return;
     const queue = generateAllCues();
     if(queue.length > 0) {
-      vista.socketGo(queue).then(success => {
+      vista.go(queue).then(success => {
         if(success) {
           setCycLive(cycPreview);
           setStageLive(stagePreview);

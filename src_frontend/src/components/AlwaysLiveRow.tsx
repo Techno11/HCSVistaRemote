@@ -25,18 +25,18 @@ export default function AlwaysLiveRow({onBo}: IProps) {
   const goHouse = (e: React.MouseEvent<HTMLAnchorElement> | React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if(house < 2) {
-      vista.socketGo([{intensity: 100, mode: CuestackTriggerMode.PLAY, cuestack: HHS.board.HOUSE}]).then(success => setHouse(success ? house + 1 : house))
+      vista.go([{intensity: 100, mode: CuestackTriggerMode.PLAY, cuestack: HHS.board.HOUSE}]).then(success => setHouse(success ? house + 1 : house))
     } else {
-      vista.socketGo([{intensity: 100, mode: CuestackTriggerMode.RELEASE, cuestack: HHS.board.HOUSE}]).then(success => setHouse(success ? 0 : house))
+      vista.go([{intensity: 100, mode: CuestackTriggerMode.RELEASE, cuestack: HHS.board.HOUSE}]).then(success => setHouse(success ? 0 : house))
     }
   }
 
   const goWash = (e: React.MouseEvent<HTMLAnchorElement> | React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if(!wash) {
-      vista.socketGo([{intensity: 100, mode: CuestackTriggerMode.PLAY, cuestack: HHS.board.WASH}]).then(success => setWash(success))
+      vista.go([{intensity: 100, mode: CuestackTriggerMode.PLAY, cuestack: HHS.board.WASH}]).then(success => setWash(success))
     } else {
-      vista.socketGo([{intensity: 100, mode: CuestackTriggerMode.RELEASE, cuestack: HHS.board.WASH}]).then(success => setWash(!success))
+      vista.go([{intensity: 100, mode: CuestackTriggerMode.RELEASE, cuestack: HHS.board.WASH}]).then(success => setWash(!success))
     }
   }
 
@@ -46,10 +46,10 @@ export default function AlwaysLiveRow({onBo}: IProps) {
     const setState = bo === BOType.Cut ? setBoCut : bo === BOType.Two ? setBo2 : bo === BOType.Five ? setBo5 : setBo10;
     const cuestack = bo === BOType.Cut ? HHS.board.BO_CUT : bo === BOType.Two ? HHS.board.BO_2 : bo === BOType.Five ? HHS.board.BO_5 : HHS.board.BO_10;
     if(!state) {
-      vista.socketGo([{intensity: 100, mode: CuestackTriggerMode.PLAY, cuestack: cuestack}]).then(success => setState(success))
+      vista.go([{intensity: 100, mode: CuestackTriggerMode.PLAY, cuestack: cuestack}]).then(success => setState(success))
       onBo();
     } else {
-      vista.socketGo([{intensity: 100, mode: CuestackTriggerMode.RELEASE, cuestack: cuestack}]).then(success => setState(!success))
+      vista.go([{intensity: 100, mode: CuestackTriggerMode.RELEASE, cuestack: cuestack}]).then(success => setState(!success))
     }
   }
 
