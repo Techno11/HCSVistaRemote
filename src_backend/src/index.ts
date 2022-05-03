@@ -1,14 +1,14 @@
 import * as http from 'http';
 import {Server as SocketServer, Socket} from 'socket.io';
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express, { Request, Response } from 'express';
 import ScreenMachine from "./ScreenMachine";
 import VistaSerial from "./VistaSerial";
 import ConnectionManager from "./ConnectionManager"
-import LightBoard from "./constants/LightBoard";
 import AuthEvents from "./events/AuthEvents";
 import * as path from 'path';
 import ControlEvents from './events/ControlEvents';
 import SetupEvents from "./events/SetupEvents";
+import Os from "os";
 
 const app = express();
 
@@ -61,7 +61,17 @@ io.on('connection', async (client: Socket) => {
 // Start the HTTP server
 const port = process.env.port ?? '8008'
 
+// Get network interfaces
+const nics = Os.networkInterfaces();
+
 server.listen(port)
 server.on('listening', () => {
-  console.log(`✔ Server Listening on port ${port}`)
+  console.log(`✔ HTTP Server Running. Available at:`)
+  for(const key in nics) {
+    // @ts-ignore
+    if(nics.hasOwnProperty(key) && nics[key] && nics[key][0] && nics[key][0].family === "IPv4") {
+      // @ts-ignore
+      console.log(`${key}: http://${nics[key][0].address }:${port}`)
+    }
+  }
 })

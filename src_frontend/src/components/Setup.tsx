@@ -6,6 +6,7 @@ import ClickHere from "../assets/clickhere.jpg"
 import UpsideDownMouse from "../assets/upsidedownmouse.jpg"
 import Com0ComConfig from "../assets/com0comconfig.png"
 import VistaSerialSettings from "../assets/vista-config.png"
+import BuildingBoard from "../models/BuildingBoard";
 
 interface IProps {
   status: {serial_status: boolean, board_status: boolean}
@@ -23,7 +24,8 @@ Steps:
 6: Calibrating...
 7: Post Calibration/Serial Info
 8: Serial Loading
-9: All Done / Vista Serial Config
+9: Select Building
+10: All Done / Vista Serial Config
  */
 
 export default function Setup({status, finished}: IProps) {
@@ -41,7 +43,6 @@ export default function Setup({status, finished}: IProps) {
 
   const nextStep = () => {
     const next = getStep() + 1;
-    console.log("advancing to step ", next)
     setStep(next);
     if(next < 5) { // Kickoff board locators
       vista.setupBoard(next - 1).then(() => {
@@ -57,9 +58,15 @@ export default function Setup({status, finished}: IProps) {
       vista.setupSerial().then(() => {
         nextStep();
       })
-    } else if (next === 10) { // All done!
+    } else if (next === 11) { // All done!
       finished();
     }
+  }
+
+  const setBuilding = (bldg: BuildingBoard) => {
+    vista.setBuilding(bldg).then(() => {
+      nextStep();
+    })
   }
 
   // Step 0
@@ -126,7 +133,7 @@ export default function Setup({status, finished}: IProps) {
   const SerialStep = () => {
     return (
       <>
-        <Typography variant={"h5"}>One last step...</Typography>
+        <Typography variant={"h5"}>Setup Serial</Typography>
         <Typography>The consoles are now properly calibrated. Please refrain from moving them on the screen</Typography>
         <Typography>Now, please launch "com0com" setup from the start menu and ensure the configuration looks as follows</Typography>
         <img alt={"com0com config"} src={Com0ComConfig} />
@@ -149,6 +156,19 @@ export default function Setup({status, finished}: IProps) {
   }
 
   // Step 9
+  const SetBuilding = () => {
+    return (
+      <>
+        <Typography variant={"h5"}>Select Building</Typography>
+        <Typography>Which building are you at?</Typography>
+        <Button variant={"contained"} onClick={() => setBuilding(BuildingBoard.HHS)}>Hartland High School</Button>
+        <Typography>or</Typography>
+        <Button variant={"contained"} onClick={() => setBuilding(BuildingBoard.PAC)}>Hartland Performing Arts Center</Button>
+      </>
+    )
+  }
+
+  // Step 10
   const AllDone = () => {
     return (
       <>
@@ -183,6 +203,9 @@ export default function Setup({status, finished}: IProps) {
         <SerialLoading />
       }
       { step === 9 &&
+        <SetBuilding />
+      }
+      { step === 10 &&
         <AllDone />
       }
     </Box>

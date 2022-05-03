@@ -1,5 +1,5 @@
 import BuildingBoard from "./BuildingBoard";
-import * as HHS from "../constants/ConsoleEnumsHHS"
+import * as HHS from "../constants/ConsoleHHS"
 import Cuestack from "./Cuestack";
 
 type WashZone =

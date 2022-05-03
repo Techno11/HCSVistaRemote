@@ -1,5 +1,6 @@
 import {io, Socket} from "socket.io-client";
 import CuestackTrigger from "../models/CuestackTrigger";
+import BuildingBoard from "../models/BuildingBoard";
 
 const rateLimit = 50; // how many MS to wait between sending requests to avoid spamming
 
@@ -115,6 +116,32 @@ export default class VistaSocket {
         else reject(json.error);
       })
       this._socket.emit("setup-serial");
+    })
+  }
+
+  /**
+   * Send building configuration
+   */
+  public setBuilding(bldg: BuildingBoard): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this._socket.on("setup-building-response", json => {
+        if(json.success) resolve();
+        else reject(json.error);
+      })
+      this._socket.emit("setup-building", {bldg});
+    })
+  }
+
+  /**
+   * Get building configuration
+   */
+  public getBuilding(): Promise<BuildingBoard> {
+    return new Promise((resolve, reject) => {
+      this._socket.on("get-building-response", json => {
+        if(json.success) resolve(json.bldg);
+        else reject(json.error);
+      })
+      this._socket.emit("get-building");
     })
   }
 }

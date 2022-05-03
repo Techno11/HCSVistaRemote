@@ -3,7 +3,7 @@ import {useState} from 'react';
 import {Button, ButtonGroup, Grid, Slider, TextField, Typography} from "@mui/material";
 import {useVista} from "../hooks/useVista";
 import {CuestackTriggerMode} from "../models/CuestackTrigger";
-import * as HHS from "../constants/ConsoleEnumsHHS"
+import * as HHS from "../constants/ConsoleHHS"
 import BOType from "../models/BO";
 
 interface IProps {

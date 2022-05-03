@@ -1,6 +1,6 @@
 enum BuildingBoard {
-  HHS,
-  PAC
+  HHS = "HHS",
+  PAC = "PAC"
 }
 
 

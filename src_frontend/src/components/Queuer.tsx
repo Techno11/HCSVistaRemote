@@ -3,7 +3,8 @@ import {useEffect, useState} from 'react';
 import {Box, Button, ButtonGroup, Grid, Typography} from "@mui/material";
 import Color from "../models/Color";
 import CuestackTrigger, {CuestackTriggerMode} from "../models/CuestackTrigger";
-import * as HHS from "../constants/ConsoleEnumsHHS"
+import HHS from "../constants/ConsoleHHS"
+import PAC from "../constants/ConsoleHHS"
 import {useVista} from "../hooks/useVista";
 import ColorSelector, {ColorChange} from "./ColorSelector";
 import AlwaysLiveRow from "./AlwaysLiveRow";
@@ -31,8 +32,11 @@ const initialWashState = {
 
 export default function Queuer() {
 
-  const boardType = BuildingBoard.HHS;
+  // Vista Hook
   const vista = useVista();
+
+  // Board type
+  const [boardType, setBoardType] = useState<BuildingBoard>(BuildingBoard.PAC);
 
   // Cyc
   const [cycLive, setCycLive] = useState<ColorChange>({color: Color.OFF, intensity: 100});
@@ -42,12 +46,25 @@ export default function Queuer() {
   const [stageLive, setStageLive] = useState<ColorChange>({color: Color.OFF, intensity: 100});
   const [stagePreview, setStagePreview] = useState<ColorChange>({color: Color.OFF, intensity: 100});
 
+  // Truss LEDs
+  const [trussLive, setTrussLive] = useState<ColorChange>({color: Color.OFF, intensity: 100});
+  const [trussPreview, setTrussPreview] = useState<ColorChange>({color: Color.OFF, intensity: 100});
+
   // Wash
   const [washPreview, setWashPreview] = useState<ZoneStates>(initialWashState)
   const [washLive, setWashLive] = useState<ZoneStates>(initialWashState)
 
   // Are we editing live?
   const [live, setLive] = useState<boolean>(false);
+
+  // Get correct console based on state
+  const buildingConsole = () => boardType === BuildingBoard.PAC ? PAC : HHS;
+
+  // On Page Load
+  useEffect(() => {
+    // Get our board type from the server
+    vista.getBuilding().then(b => setBoardType(b));
+  }, [])
 
   /**
    * Toggle live state. If we're in live going back to preview, we take our "live" state with us
@@ -58,6 +75,7 @@ export default function Queuer() {
       setWashPreview(washLive);
       setStagePreview(stageLive);
       setCycPreview(cycLive);
+      setTrussPreview(trussLive);
     } else {
       setLive(true);
     }
@@ -87,6 +105,19 @@ export default function Queuer() {
       goCues(calculateStageCues(val));
     } else {
       setStagePreview(val);
+    }
+  }
+
+  /**
+   * Update stage-wash state when the stage-wash selector is changed
+   * @param val New state
+   */
+  const onTrussChange = (val: ColorChange) => {
+    if(live) {
+      setTrussLive(val);
+      goCues(calculateTrussCues(val));
+    } else {
+      setTrussPreview(val);
     }
   }
 
@@ -129,11 +160,13 @@ export default function Queuer() {
     // Reset preview states
     setCycPreview({color: Color.OFF, intensity: 100});
     setStagePreview({color: Color.OFF, intensity: 100});
+    setTrussPreview({color: Color.OFF, intensity: 100});
     setWashPreview(initialWashState);
 
     // Reset live states
     setCycLive({color: Color.OFF, intensity: 100});
     setStageLive({color: Color.OFF, intensity: 100});
+    setTrussLive({color: Color.OFF, intensity: 100});
     setWashLive(initialWashState);
   }
 
@@ -157,6 +190,7 @@ export default function Queuer() {
           setCycLive(cycPreview);
           setStageLive(stagePreview);
           setWashLive(washPreview);
+          setTrussLive(trussPreview);
           setLive(true);
         } else {
           // TODO: Toast failure
@@ -176,7 +210,7 @@ export default function Queuer() {
         if(vals[zone].enabled === washLive[zone].enabled && vals[zone].intensity === washLive[zone].intensity) continue; // skip if no changes
         queue.push({
           intensity: vals[zone].intensity,
-          cuestack: HHS.wash(vals[zone].name),
+          cuestack: buildingConsole().wash(vals[zone].name),
           // if it's on in live, just adjust intensity
           mode: washLive[zone].enabled && vals[zone].enabled ? CuestackTriggerMode.INTENSITY :
                 vals[zone].enabled ? CuestackTriggerMode.PLAY : CuestackTriggerMode.RELEASE
@@ -196,13 +230,36 @@ export default function Queuer() {
     if(stageLive.color !== vals.color) {    // Both color changed
       queue.push({
         intensity: vals.intensity,
-        cuestack: HHS.stage(vals.color),
+        cuestack: buildingConsole().stage(vals.color),
         mode: vals.color === Color.OFF ? CuestackTriggerMode.RELEASE : CuestackTriggerMode.PLAY
       });
     } else if (stageLive.color === vals.color && stageLive.intensity !== vals.intensity) { // only intensity changed
       queue.push({
         intensity: vals.intensity,
-        cuestack: HHS.stage(vals.color),
+        cuestack: buildingConsole().stage(vals.color),
+        mode: CuestackTriggerMode.INTENSITY
+      });
+    }
+
+    return queue;
+  }
+
+  /**
+   * Calculate the cues needed to achieve the vals truss state
+   * @param vals the truss state desired to be achieved
+   */
+  const calculateTrussCues = (vals: ColorChange) => {
+    const queue = [] as CuestackTrigger[];
+    if(trussLive.color !== vals.color) {    // Both color changed
+      queue.push({
+        intensity: vals.intensity,
+        cuestack: buildingConsole().stage(vals.color),
+        mode: vals.color === Color.OFF ? CuestackTriggerMode.RELEASE : CuestackTriggerMode.PLAY
+      });
+    } else if (trussLive.color === vals.color && trussLive.intensity !== vals.intensity) { // only intensity changed
+      queue.push({
+        intensity: vals.intensity,
+        cuestack: buildingConsole().stage(vals.color),
         mode: CuestackTriggerMode.INTENSITY
       });
     }
@@ -219,13 +276,13 @@ export default function Queuer() {
      if(cycLive.color !== vals.color) {    // Both color changed
        queue.push({
          intensity: vals.intensity,
-         cuestack: HHS.cyc(vals.color),
+         cuestack: buildingConsole().cyc(vals.color),
          mode: vals.color === Color.OFF ? CuestackTriggerMode.RELEASE : CuestackTriggerMode.PLAY
        });
      } else if (cycLive.color === vals.color && cycLive.intensity !== vals.intensity) { // only intensity changed
        queue.push({
          intensity: vals.intensity,
-         cuestack: HHS.cyc(vals.color),
+         cuestack: buildingConsole().cyc(vals.color),
          mode: CuestackTriggerMode.INTENSITY
        });
      }
@@ -240,7 +297,8 @@ export default function Queuer() {
     return [
       ...calculateWashCues(washPreview),
       ...calculateCycCues(cycPreview),
-      ...calculateStageCues(stagePreview)
+      ...calculateStageCues(stagePreview),
+      ...(boardType === BuildingBoard.PAC ? calculateTrussCues(trussPreview) : [])
     ];
   }
 
@@ -261,28 +319,47 @@ export default function Queuer() {
       {/* Cyc / Stage / Truss / Wash Selectors */}
       <Grid item sx={{maxHeight: "475px"}}>
         <Grid container direction={'row'} spacing={2} justifyContent={"center"}>
+
+          {/* Cyc Selector */}
           <Grid item xs={3.5} sx={{height: '100%'}}>
             <BoxTitle title={"Cyc"}>
               <ColorSelector onChange={(d) => {onCycChange(d)}} value={live ? cycLive : cycPreview} cyc />
             </BoxTitle>
           </Grid>
+
+          {/* Stage Wash Selector */}
           <Grid item xs={2} sx={{height: '100%'}}>
             <BoxTitle title={"Stage"}>
               <ColorSelector onChange={(d) => {onStageChange(d)}} value={live ? stageLive : stagePreview} />
             </BoxTitle>
           </Grid>
+
+          {/* Truss Selector */}
+          {boardType === BuildingBoard.PAC && // Only show if the building board is PAC
+            <Grid item xs={2} sx={{height: '100%'}}>
+              <BoxTitle title={"Truss"}>
+                <ColorSelector onChange={(d) => {onTrussChange(d)}} value={live ? trussLive : trussPreview}/>
+              </BoxTitle>
+            </Grid>
+          }
+
+          {/* Wash Selector */}
           <Grid item xs={3}>
             <BoxTitle title={"Wash"}>
               <WashEditor onChange={(states) => onWashChange(states)} value={live ? washLive : washPreview}/>
             </BoxTitle>
           </Grid>
+
         </Grid>
       </Grid>
 
       {/* Always Live Row */}
       <Grid item>
-        <AlwaysLiveRow onBo={() => onBo()} />
+        <BoxTitle title={"Always Live"}>
+          <AlwaysLiveRow onBo={() => onBo()} buildingConsole={buildingConsole} />
+        </BoxTitle>
       </Grid>
+
     </Grid>
   );
 }

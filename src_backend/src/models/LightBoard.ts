@@ -1,6 +1,6 @@
 enum LightBoard {
-  HHS,
-  PAC
+  HHS = "HHS",
+  PAC = "PAC"
 }
 
 const LightBoardNames = ['HHS', 'PAC']

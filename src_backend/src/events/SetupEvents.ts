@@ -2,6 +2,7 @@ import { Socket } from "socket.io";
 import ConnectionManager from "../ConnectionManager";
 import ScreenMachine from "../ScreenMachine";
 import VistaSerial from "../VistaSerial";
+import LightBoard from "../models/LightBoard";
 
 const SetupEvents = (client: Socket, connManager: ConnectionManager, screenMachine: ScreenMachine, vistaSerial: VistaSerial, clientAuthString: {code: string}) => {
   const ua = client.request.headers["user-agent"];
@@ -74,6 +75,25 @@ const SetupEvents = (client: Socket, connManager: ConnectionManager, screenMachi
     vistaSerial.setup("COM9").then(() => {
       client.emit('setup-serial-response', {success: true});
     });
+  })
+
+  client.on('setup-building', ({bldg}: {bldg: LightBoard}) => {
+    if (!connManager.isAuthed(clientAuthString.code, ua, ip)) {
+      client.emit('setup-building-response', {success: false, error: "Not Authorized"})
+      return;
+    }
+
+    screenMachine.setBoard(bldg);
+    client.emit('setup-building-response', {success: true, bldg})
+  })
+
+  client.on('get-building', () => {
+    if (!connManager.isAuthed(clientAuthString.code, ua, ip)) {
+      client.emit('get-building-response', {success: false, error: "Not Authorized"})
+      return;
+    }
+
+    client.emit('get-building-response', {success: true, bldg: screenMachine.getBoard()})
   })
 }
 

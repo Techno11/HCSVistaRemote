@@ -1,7 +1,6 @@
 import E2AConsole from "./models/E2AConsole";
-import LightBoard, {LightBoardNames} from "./constants/LightBoard";
+import LightBoard from "./models/LightBoard";
 import CuestackTrigger from "./models/CuestackTrigger";
-import {waitSync} from "./common";
 import iohook from "iohook"
 const prompt = require('prompt-sync')();
 
@@ -20,43 +19,6 @@ class ScreenMachine {
   ]
 
   private ready = false;
-  private oldFaderMethod = true;
-
-
-  /**
-   * legacy console setup. not used anymore
-   * prompts the user for selecting the faders on the Vista consoles
-   * @param board
-   */
-  public async setup(board: LightBoard) {
-    // Store Board Type
-    this.boardType = board;
-    console.log(`******************************** Setup for the ${LightBoardNames[board]} board ********************************`)
-    for(let i = 0; i < this.consoles.length; i++) {
-      process.stdout.write(`Please select about the '90%' on the upper-left-most fader of the #${i + 1} console: `);
-      this.consoles[i] = await this.getClickCoords();
-      console.log(`(${this.consoles[i].x}, ${this.consoles[i].y})`)
-    }
-
-    if(this.readYN('\nWould you like to reset all faders? y/n', 'g')) {
-      process.stdout.write("Please keep your hand off the mouse during this process! Resetting faders in 3... ");
-      waitSync(1000);
-      process.stdout.write("2... ")
-      waitSync(1000);
-      process.stdout.write("1... ")
-      waitSync(1000);
-      process.stdout.write("Resetting... ")
-      this.resetAllFaders();
-      console.log('Faders Reset!')
-      this.oldFaderMethod = false;
-    } else {
-      this.assumeAll100();
-      console.log('Assuming all faders are at 100%...')
-    }
-    console.log(`****************************** End Setup for the ${LightBoardNames[board]} board ******************************`)
-    this.ready = true;
-  }
-
 
   /**
    * Find the 100% mark on our pre-located boards
@@ -146,6 +108,21 @@ class ScreenMachine {
    */
   public isReady() {
     return this.ready;
+  }
+
+  /**
+   * Set what building/board we're working with
+   * @param bldg building
+   */
+  public setBoard(bldg: LightBoard) {
+    this.boardType = bldg;
+  }
+
+  /**
+   * Get what building/board we're working with
+   */
+  public getBoard(): LightBoard {
+    return this.boardType;
   }
 }
 
