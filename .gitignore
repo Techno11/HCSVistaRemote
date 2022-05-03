@@ -114,3 +114,4 @@ src_backend/public/
 
 # Built Binaries
 bin/
+get-pixel-screen/build/
