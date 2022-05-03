@@ -9,7 +9,8 @@
     "build-all": "npm run build-frontend && npm run build-backend",
     "move-built-frontend": "npx copy src_frontend/build/**/* src_backend/public",
     "bin-win": "cd src_backend && npm run build-bin && cd ../",
-    "build-binary-win": "npm run build-all && npm run move-built-frontend && npm run bin-win"
+    "build-binary-win": "npm run build-all && npm run move-built-frontend && npm run bin-win",
+    "install-all-ci": "cd src_backend && npm ci && cd ../src_frontend && npm ci && cd ../"
   },
   "repository": {
     "type": "git",
