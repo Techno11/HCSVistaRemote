@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {useEffect, useState} from 'react';
-import {Box, Button, Grid, Typography} from "@mui/material";
+import {Box, Button, ButtonGroup, Grid, Typography} from "@mui/material";
 import Color from "../models/Color";
 import CuestackTrigger, {CuestackTriggerMode} from "../models/CuestackTrigger";
 import * as HHS from "../constants/ConsoleEnumsHHS"
@@ -11,6 +11,7 @@ import WashEditor from "./WashEditor";
 import ZoneState from "../models/ZoneState";
 import ZoneStates from "../models/ZoneStates";
 import BuildingBoard from "../models/BuildingBoard";
+import BoxTitle from "./BoxTitle";
 
 const initialWashState = {
   z1: {enabled: false, intensity: 100, name: "z1"} as ZoneState,
@@ -31,8 +32,8 @@ const initialWashState = {
 export default function Queuer() {
 
   const boardType = BuildingBoard.HHS;
-
   const vista = useVista();
+
   // Cyc
   const [cycLive, setCycLive] = useState<ColorChange>({color: Color.OFF, intensity: 100});
   const [cycPreview, setCycPreview] = useState<ColorChange>({color: Color.OFF, intensity: 100});
@@ -48,6 +49,9 @@ export default function Queuer() {
   // Are we editing live?
   const [live, setLive] = useState<boolean>(false);
 
+  /**
+   * Toggle live state. If we're in live going back to preview, we take our "live" state with us
+   */
   const toggleLive = () => {
     if(live) {
       setLive(false);
@@ -59,6 +63,11 @@ export default function Queuer() {
     }
   }
 
+
+  /**
+   * Update cyc state when the cyc selector is changed
+   * @param val New State
+   */
   const onCycChange = (val: ColorChange) => {
     if (live) {
       setCycLive(val);
@@ -68,6 +77,10 @@ export default function Queuer() {
     }
   }
 
+  /**
+   * Update stage-wash state when the stage-wash selector is changed
+   * @param val New state
+   */
   const onStageChange = (val: ColorChange) => {
     if(live) {
       setStageLive(val);
@@ -77,6 +90,10 @@ export default function Queuer() {
     }
   }
 
+  /**
+   * Update wash state when the wash selector is changed
+   * @param val New state
+   */
   const onWashChange = (val: ZoneStates) => {
     if(live) {
       setWashLive(val);
@@ -86,6 +103,10 @@ export default function Queuer() {
     }
   }
 
+  /**
+   * Push a set of cues to Vista. Used in live mode
+   * @param queue queue of cues to send
+   */
   const goCues = (queue: CuestackTrigger[]) => {
     if(queue.length > 0) {
       vista.go(queue).then(success => {
@@ -98,30 +119,56 @@ export default function Queuer() {
     }
   }
 
+  /**
+   * A BO, once triggered successfully, releases all cuestacks, in both live and preview mode
+   */
   const onBo = () => {
+    // Disable live
     setLive(false);
+
+    // Reset preview states
     setCycPreview({color: Color.OFF, intensity: 100});
     setStagePreview({color: Color.OFF, intensity: 100});
     setWashPreview(initialWashState);
+
+    // Reset live states
+    setCycLive({color: Color.OFF, intensity: 100});
+    setStageLive({color: Color.OFF, intensity: 100});
+    setWashLive(initialWashState);
   }
 
+  /**
+   * Calculate the queues required to push the preview to live
+   */
   const goPreview = () => {
+    // If we're already in live mode, ignore
     if(live) return;
+
+    // Generate cues Cues
     const queue = generateAllCues();
+
+    // If there are actually cues to run
     if(queue.length > 0) {
+
+      // Push The queue of cues to the socket
       vista.go(queue).then(success => {
         if(success) {
+          // Push our preview state to live
           setCycLive(cycPreview);
           setStageLive(stagePreview);
           setWashLive(washPreview);
           setLive(true);
         } else {
-          // error occured? sad
+          // TODO: Toast failure
         }
       });
     }
   }
 
+  /**
+   * Calculate the cues needed to achieve the vals wash state
+   * @param vals the wash state desired to be achieved
+   */
   const calculateWashCues = (vals: ZoneStates) => {
     const queue = [] as CuestackTrigger[];
     for(let zone in vals) {
@@ -140,6 +187,10 @@ export default function Queuer() {
     return queue;
   }
 
+  /**
+   * Calculate the cues needed to achieve the vals stage-wash state
+   * @param vals the stage-wash state desired to be achieved
+   */
   const calculateStageCues = (vals: ColorChange) => {
     const queue = [] as CuestackTrigger[];
     if(stageLive.color !== vals.color) {    // Both color changed
@@ -159,6 +210,10 @@ export default function Queuer() {
     return queue;
   }
 
+  /**
+   * Calculate the cues needed to achieve the vals cyc state
+   * @param vals the cyc state desired to be achieved
+   */
    const calculateCycCues = (vals: ColorChange) => {
      const queue = [] as CuestackTrigger[];
      if(cycLive.color !== vals.color) {    // Both color changed
@@ -178,45 +233,56 @@ export default function Queuer() {
      return queue;
    }
 
+  /**
+   * Generate all cues needed to achieve the overall state, and put them in an array
+   */
   const generateAllCues = (): CuestackTrigger[] => {
     return [
       ...calculateWashCues(washPreview),
-      ...calculateStageCues(stagePreview),
-      ...calculateCycCues(cycPreview)
+      ...calculateCycCues(cycPreview),
+      ...calculateStageCues(stagePreview)
     ];
   }
 
   return (
-    <Box sx={{ height: '100vh' }}>
-      <Grid container direction={'column'} sx={{height: '100%'}} >
-        <Grid item sm={1}>
-          <Box sx={{background: live ? "rgba(255, 0, 0, 1)" : "lightgrey"}}>
-            <Typography sx={{textAlign: 'center'}} variant={'h2'}>{live ? "LIVE EDITING" : "Queueing Mode"}</Typography>
-          </Box>
-        </Grid>
-        <Grid item sm={1} sx={{mb: 2}}>
-          <Button variant={'contained'} sx={{width: 1}} onClick={() => {toggleLive()}}>{live ? "TO QUEUING MODE" : "ENTER LIVE MODE"}</Button>
-        </Grid>
-        <Grid item sm={6}>
-          <Grid container direction={'row'} spacing={4}>
-            <Grid item xs={3} sx={{height: '100%'}}>
-              <ColorSelector onChange={(d) => {onCycChange(d)}} value={live ? cycLive : cycPreview} cyc title={"Cyc"} />
-            </Grid>
-            <Grid item xs={2} sx={{height: '100%'}}>
-              <ColorSelector onChange={(d) => {onStageChange(d)}} value={live ? stageLive : stagePreview} title={"Stage"} />
-            </Grid>
-            <Grid item xs={5}>
+    <Grid container direction={'column'} sx={{height: '100vh'}}>
+
+      {/* Mode Header / Header Buttons */}
+      <Grid item>
+        <Box sx={{background: live ? "rgba(255, 0, 0, .5)" : "grey"}}>
+          <Typography sx={{textAlign: 'center'}} variant={'h2'}>{live ? "LIVE EDITING" : "Queueing Mode"}</Typography>
+        </Box>
+        <ButtonGroup orientation={"horizontal"} size={"large"} fullWidth>
+          <Button variant={'contained'} onClick={() => {toggleLive()}}>{live ? "TO QUEUING MODE" : "ENTER LIVE MODE"}</Button>
+          <Button variant={'contained'} onClick={() => {goPreview()}} disabled={live}>Please</Button>
+        </ButtonGroup>
+      </Grid>
+
+      {/* Cyc / Stage / Truss / Wash Selectors */}
+      <Grid item sx={{maxHeight: "475px"}}>
+        <Grid container direction={'row'} spacing={2} justifyContent={"center"}>
+          <Grid item xs={3.5} sx={{height: '100%'}}>
+            <BoxTitle title={"Cyc"}>
+              <ColorSelector onChange={(d) => {onCycChange(d)}} value={live ? cycLive : cycPreview} cyc />
+            </BoxTitle>
+          </Grid>
+          <Grid item xs={2} sx={{height: '100%'}}>
+            <BoxTitle title={"Stage"}>
+              <ColorSelector onChange={(d) => {onStageChange(d)}} value={live ? stageLive : stagePreview} />
+            </BoxTitle>
+          </Grid>
+          <Grid item xs={3}>
+            <BoxTitle title={"Wash"}>
               <WashEditor onChange={(states) => onWashChange(states)} value={live ? washLive : washPreview}/>
-            </Grid>
-            <Grid item>
-              <Button variant={'contained'} onClick={() => {goPreview()}}>Please</Button>
-            </Grid>
+            </BoxTitle>
           </Grid>
         </Grid>
-        <Grid item>
-          <AlwaysLiveRow onBo={() => onBo()} />
-        </Grid>
       </Grid>
-    </Box>
+
+      {/* Always Live Row */}
+      <Grid item>
+        <AlwaysLiveRow onBo={() => onBo()} />
+      </Grid>
+    </Grid>
   );
 }

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {useState} from 'react';
-import {Button, ButtonGroup, Grid, Typography} from "@mui/material";
+import {Box, Button, ButtonGroup, Grid, Typography} from "@mui/material";
 import {useVista} from "../hooks/useVista";
 import {CuestackTriggerMode} from "../models/CuestackTrigger";
 import * as HHS from "../constants/ConsoleEnumsHHS"
@@ -55,27 +55,25 @@ export default function AlwaysLiveRow({onBo}: IProps) {
 
 
   return (
-    <>
+    <Box sx={{textAlign: "center"}}>
       <Typography variant={"h4"}><u>Always Live</u></Typography>
-      <Grid container direction={'row'} spacing={2}>
-      <Grid item>
+      <Grid container direction={'row'} spacing={2} alignItems={"center"} justifyContent={"center"}>
+        <Grid item>
+          <ButtonGroup orientation={'horizontal'} sx={{width: "100%"}}>
+            <Button size={'large'} variant={'contained'} onClick={(e) => goHouse(e)}>{house < 1 ? "House Full" : house < 2 ? "House Half" : "Release House"}</Button>
+            <Button size={'large'} variant={'contained'} onClick={(e) => goWash(e)}>{!wash ? "Wash 100" : "Release Wash"}</Button>
+          </ButtonGroup>
+        </Grid>
+        <Grid item>
+          <ButtonGroup orientation={'horizontal'} sx={{width: "100%"}}>
+            <Button size={'large'} variant={'contained'} sx={{background: "black", border: "3px solid white !important"}} onClick={(e) => goBO(e, BOType.Cut)}>{!boCut ? "Cut BO" : "Release Cut BO"}</Button>
+            <Button size={'large'} variant={'contained'} sx={{background: "black", border: "3px solid white !important"}} onClick={(e) => goBO(e, BOType.Two)}>{!bo2 ? "2 BO" : "Release 2 BO"}</Button>
+            <Button size={'large'} variant={'contained'} sx={{background: "black", border: "3px solid white !important"}} onClick={(e) => goBO(e, BOType.Five)}>{!bo5 ? "5 BO" : "Release 5 BO"}</Button>
+            <Button size={'large'} variant={'contained'} sx={{background: "black", border: "3px solid white !important"}} onClick={(e) => goBO(e, BOType.Ten)}>{!bo10 ? "10 BO" : "Release 10 BO"}</Button>
+          </ButtonGroup>
+        </Grid>
       </Grid>
-      <Grid item>
-        <ButtonGroup orientation={'horizontal'} sx={{width: "100%"}}>
-          <Button variant={'contained'} onClick={(e) => goHouse(e)}>{house < 1 ? "House Full" : house < 2 ? "House Half" : "Release House"}</Button>
-          <Button variant={'contained'} onClick={(e) => goWash(e)}>{!wash ? "Wash 100" : "Release Wash"}</Button>
-        </ButtonGroup>
-      </Grid>
-      <Grid item>
-        <ButtonGroup orientation={'horizontal'} sx={{width: "100%"}}>
-          <Button size={'large'} variant={'contained'} sx={{background: "black", borderRight: "5px solid white !important"}} onClick={(e) => goBO(e, BOType.Cut)}>{!boCut ? "Cut BO" : "Release Cut BO"}</Button>
-          <Button size={'large'} variant={'contained'} sx={{background: "black", borderRight: "5px solid white !important"}} onClick={(e) => goBO(e, BOType.Two)}>{!bo2 ? "2 BO" : "Release 2 BO"}</Button>
-          <Button size={'large'} variant={'contained'} sx={{background: "black", borderRight: "5px solid white !important"}} onClick={(e) => goBO(e, BOType.Five)}>{!bo5 ? "5 BO" : "Release 5 BO"}</Button>
-          <Button size={'large'} variant={'contained'} sx={{background: "black"}} onClick={(e) => goBO(e, BOType.Ten)}>{!bo10 ? "10 BO" : "Release 10 BO"}</Button>
-        </ButtonGroup>
-      </Grid>
-    </Grid>
-    </>
+    </Box>
 
   );
 }
