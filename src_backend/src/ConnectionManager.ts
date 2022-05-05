@@ -1,6 +1,7 @@
 // Connection manager is a primative memory database that manages how many connections once connection code can have
 
 import {Socket} from "socket.io";
+import CuestackTrigger from "./models/CuestackTrigger";
 
 interface ClientAuth {
   authenticated: boolean,
@@ -10,10 +11,17 @@ interface ClientAuth {
   socket?: Socket
 }
 
+/**
+ * Connection manager tracks the auth state of connected users
+ * It also tracks board state out of convenience
+ */
 class ConnectionManager {
 
-
+  // Connections map
   private connections = {} as {[key: string]: ClientAuth};
+
+  // Tracks board state by CuestackTrigger.cuestack.type, since we can only have one of each "type" running
+  private boardState: {[key: string]: CuestackTrigger} = {}
 
   /**
    * Disconnect marks a user as disconnected
@@ -112,6 +120,21 @@ class ConnectionManager {
       // emit event
       currentConn.socket.emit(event, payload);
     }
+  }
+
+  /**
+   * Update board state
+   * @param cues Cues to update board state with
+   */
+  public updateBoard (cues: CuestackTrigger[]) {
+    for(const cue of cues) this.boardState[cue.cuestack.type] = cue;
+  }
+
+  /**
+   * Returns the current board state
+   */
+  public getBoardState(): CuestackTrigger[] {
+    return Object.values(this.boardState);
   }
 }
 

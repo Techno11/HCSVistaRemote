@@ -24,11 +24,21 @@ const ControlEvents = (client: Socket, connManager: ConnectionManager, screenMac
         client.emit('go-response', {success: true})
         // Emit this event to the rest of our clients (and exclude the emitter)
         connManager.emitToAuthedClients("board-update", cues, client.id);
-        // TODO: Store this board state somewhere
+        // Store Board State
+        connManager.updateBoard(cues);
       } else {
         client.emit('go-response', {success: false, error: "Invalid Data"})
       }
     }
+  });
+
+  client.on('get-board-state', () => {
+    if (!connManager.isAuthed(clientAuthString.code, ua, ip)) {
+      client.emit('get-board-state-response', {success: false, error: "Not Authorized"})
+      return;
+    }
+    // Emit board state back to client
+    client.emit("get-board-state-response", {success: true, state: connManager.getBoardState()});
   })
 }
 

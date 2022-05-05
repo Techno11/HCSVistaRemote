@@ -146,6 +146,19 @@ export default class VistaSocket {
   }
 
   /**
+   * Get current board state
+   */
+  public getBoardState(): Promise<CuestackTrigger[]> {
+    return new Promise((resolve, reject) => {
+      this._socket.on("get-board-state-response", json => {
+        if(json.success) resolve(json.state);
+        else reject(json.error);
+      })
+      this._socket.emit("get-board-state");
+    })
+  }
+
+  /**
    * Remove all listeners for the board-update event
    */
   public unregisterBoardEvent() {

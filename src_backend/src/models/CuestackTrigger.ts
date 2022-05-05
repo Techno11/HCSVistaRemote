@@ -1,4 +1,4 @@
-import * as HHS from '../constants/ConsoleHHS'
+import Cuestack from "./Cuestack";
 
 enum CuestackTriggerMode {
   PLAY,

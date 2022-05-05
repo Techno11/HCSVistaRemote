@@ -72,6 +72,11 @@ export default function Queuer() {
     vista.registerBoardEvent(cues => {
       interpretCues(cues);
     });
+
+    // Get current board state
+    vista.getBoardState().then(state => {
+      interpretCues(state)
+    })
   }, [])
 
   /**
