@@ -1,7 +1,8 @@
 import E2AConsole from "./models/E2AConsole";
 import LightBoard from "./models/LightBoard";
-import CuestackTrigger from "./models/CuestackTrigger";
+import CuestackTrigger, {CuestackTriggerMode} from "./models/CuestackTrigger";
 import iohook from "iohook"
+
 const prompt = require('prompt-sync')();
 
 
@@ -87,7 +88,21 @@ class ScreenMachine {
       const boardPos = command.cuestack.position;
       const intensity = command.intensity;
       this.consoles[board].commandFader(boardPos, intensity);
+      // Check if the fader is played already and if the commanded mode is play. If so, set mode to intensity only
+      // Currently the scren pixel reader likes to lock up. This is bad, this we will forego this functionality for now
+      // if(await this.consoles[board].isFaderPlayed(boardPos) && command.mode === CuestackTriggerMode.PLAY) {
+      //   command.mode = CuestackTriggerMode.INTENSITY;
+      // }
     }
+  }
+
+  /**
+   * Run an array of commands
+   * @param board board to check
+   * @param position position to check
+   */
+  public isPlayed(board: number, position: number) {
+    this.consoles[board].isFaderPlayed(position);
   }
 
   /**

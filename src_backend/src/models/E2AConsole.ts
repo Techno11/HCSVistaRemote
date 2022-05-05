@@ -1,14 +1,22 @@
 import robot from 'robotjs';
-import {getPixelBGRHex, waitSync} from "../common";
+import {getPixelBGR_unsafe, getPixelBGRHex, waitSync} from "../common";
 
 // distance between faders
 const horizontalFaderOnCenterDistance = 50;
 // distance between banks horizontally
 const horizontalFaderBankEndFaderDistance = 100;
-// distance between top and bottle banks
+// distance between top and bottom banks
 const verticalFaderBankOnCenterDistance = 300;
 // colors of the center of the fader, from left to right. Hexidecimal, BGR
 const centerFaderColors = ["2d2d2f", "2b2a2d", "29292a", "262628", "242326", "222123", "201f22", "1e1e21", "1e1d20", "1e1b1c", "1b1a1d", "1a191b"];
+// colors of the center of the "play" button when green. Hexidecimal, BGR
+const centerPlayGreen = ["20d038", "2cd139", "29ce36", "2cd138", "21bf31"]
+// colors of the center of the "play" button when red. Hexidecimal, BGR
+const centerPlayRed = ["3c35ea", "3c35eb", "3932e8", "3c35eb", "342dd7"]
+// combined colors for searching
+const centerPlayColorAll = [...centerPlayGreen, ...centerPlayRed]
+// distance between 100% and the color of the play button
+const playButtonOffset = 35
 // the "center" of the fader is 3 pixels off from when you middle click to position the fader
 const centerFaderVerticalOffset = -3;
 // height, in pixels of a fader
@@ -42,15 +50,8 @@ class E2AConsole {
   /**
    * Sets a fader to a specific rough percent
    * @param fader fader to set, 0-indexed
-   * @param percent percent to set
    */
-  public commandFader(fader: number, percent: number) {
-    // Record mouse starting position
-    const startPos = robot.getMousePos();
-    // Check if we have a change
-    if(percent === this.faderStates[fader]) return; // no change
-    if(percent > 100) percent = 100;
-    if(percent < 0) percent = 0;
+  private getFaderPos(fader: number): {x: number, y: number} {
     let realX: number, realY: number;
     if(fader < 5) {
       realX = this.x + (horizontalFaderOnCenterDistance * fader);
@@ -65,12 +66,45 @@ class E2AConsole {
       realX = this.x + (horizontalFaderOnCenterDistance * (fader - 11)) + horizontalFaderBankEndFaderDistance;
       realY = this.y + verticalFaderBankOnCenterDistance;
     }
+    return {x: realX, y: realY};
+  }
+
+  /**
+   * Sets a fader to a specific rough percent
+   * @param fader fader to set, 0-indexed
+   * @param percent percent to set
+   */
+  public commandFader(fader: number, percent: number) {
+    // Check if we have a change
+    if(percent === this.faderStates[fader]) return; // no change
+    if(percent > 100) percent = 100;
+    if(percent < 0) percent = 0;
+    // Locate fader position
+    const faderPos = this.getFaderPos(fader);
+
     // Run Fader
-    this.runFader(percent, realX, realY);
+    this.runFader(percent, faderPos.x, faderPos.y);
     // Update Fader Position
     this.faderStates[fader] = percent;
-    // Reset position to start position
-    // robot.moveMouse(startPos.x, startPos.y);
+  }
+
+  /**
+   * Determine if a fader's stack is played or not
+   * @param fader fader to set, 0-indexed
+   */
+  public isFaderPlayed(fader: number): Promise<boolean> {
+    return new Promise(async (resolve) => {
+      // Locate fader
+      const pos = this.getFaderPos(fader);
+      console.log("checking fader at ", pos)
+      // Get color at location
+      const hex = await getPixelBGRHex(pos.x, pos.y - playButtonOffset, 100);
+      console.log("read hex", hex)
+      // Check if the position is in our array of "played" colors
+      if(hex) resolve(centerPlayGreen.includes(hex));
+      // If no hex, just return
+      resolve(false);
+    })
   }
 
   /**
@@ -88,33 +122,6 @@ class E2AConsole {
   }
 
   /**
-   * Calculate and run a fader to a position
-   * @param oldPercent old percentage
-   * @param newPercent new percentage
-   * @param x x location of fader
-   * @param y y location of fader
-   * @private
-   */
-  private runFaderOld(oldPercent: number, newPercent: number, x: number, y: number) {
-    robot.moveMouse(x, y);
-    robot.mouseClick('right');
-    // 0-100 can be compleated in 255 up/down movements, so we convert everything to that
-    const oldArrow = 255 * (oldPercent/100);
-    const newArrow = 255 * (newPercent/100);
-    // Calculate delta
-    const delta = Math.abs(oldArrow - newArrow);
-    const slow = delta % 26;
-    const quick = ((delta - slow) / 255) * 26;
-    if(newArrow > oldArrow) {
-      for(let i = 0; i < quick; i++) robot.keyTap('pageup');
-      for(let i = 0; i < slow; i++) robot.keyTap('up');
-    } else {
-      for(let i = 0; i < quick; i++) robot.keyTap('pagedown');
-      for(let i = 0; i < slow; i++) robot.keyTap('down');
-    }
-  }
-
-  /**
    * Reset All Faders to 100
    */
   public resetAllFaders() {
@@ -129,6 +136,7 @@ class E2AConsole {
    */
   private find100() {
     let searched = 0;
+    // Search for 100%
     while (true) {
       // Prevent endlessly searching for fader if we've searched the entire height of a fader
       // if(searched > faderHeight) break;
@@ -139,21 +147,35 @@ class E2AConsole {
       // Wait for fader to render
       waitSync(25);
       // Get Pixel Hex Value
-      const hex = getPixelBGRHex(this.x, this.y + centerFaderVerticalOffset);
+      const hex = getPixelBGR_unsafe(this.x, this.y + centerFaderVerticalOffset);
       // Check that fader still moved
       if(centerFaderColors.includes(hex)) {
         this.y--;
         searched++;
-      } else {
+      } else { // we found it!
         break;
       }
     }
-    if(searched < faderHeight) {
-      // If we get here, assume we found the top!
-      robot.moveMouse(this.x, this.y + faderHeight);
-      robot.mouseClick("middle");
-    } else {
-      console.log('Failed to setup console, couldn\'t find 100%')
+    // Search for center of fader and locate the "color" portion of the play icon
+    searched = 0;
+    const originalX = this.x;
+    while (true) {
+      // Prevent endlessly searching for play button
+      if(searched > 100) {
+        this.x = originalX;
+        break;
+      }
+      // Get Pixel Hex Value
+      const hex = getPixelBGR_unsafe(this.x, this.y - playButtonOffset);
+      // Check that we haven't found the button yet
+      if(!centerPlayColorAll.includes(hex)) {
+        // we shouldn't need to move very from where we clicked to find it...
+        if(searched > 20) this.x--;
+        else this.x++;
+        searched++;
+      } else { // we found it!
+        break;
+      }
     }
   }
 }

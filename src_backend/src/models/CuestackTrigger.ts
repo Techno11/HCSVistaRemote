@@ -3,7 +3,8 @@ import Cuestack from "./Cuestack";
 enum CuestackTriggerMode {
   PLAY,
   RELEASE,
-  INTENSITY
+  INTENSITY,
+  ADVANCE
 }
 
 type CuestackTrigger = {

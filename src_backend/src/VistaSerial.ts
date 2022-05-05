@@ -1,6 +1,7 @@
 // Configure Vista
 import {SerialPort} from "serialport";
 import CuestackTrigger, {CuestackTriggerMode} from "./models/CuestackTrigger";
+import ScreenMachine from "./ScreenMachine";
 
 class VistaSerial {
   private vistaSerial: SerialPort | null = null;
@@ -50,7 +51,7 @@ class VistaSerial {
   public go(commands: CuestackTrigger[]) {
     for(const command of commands) {
       const stack = command.cuestack.number;
-      if(command.mode === CuestackTriggerMode.PLAY) {
+      if(command.mode === CuestackTriggerMode.PLAY || command.mode === CuestackTriggerMode.ADVANCE) {
         this.goCuestack(stack);
       } else if(command.mode === CuestackTriggerMode.RELEASE) {
         this.releaseCuestack(stack);

@@ -7,7 +7,7 @@ const ControlEvents = (client: Socket, connManager: ConnectionManager, screenMac
   const ua = client.request.headers["user-agent"];
   const ip = client.handshake.address;
 
-  client.on('go', (cues: string) => {
+  client.on('go', async (cues: string) => {
     if (!connManager.isAuthed(clientAuthString.code, ua, ip)) {
       client.emit('go-response', {success: false, error: "Not Authorized"})
       return;
