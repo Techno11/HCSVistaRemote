@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: windows-latest
+          - os: ubuntu-latest
             artifact_name: hcs_vista_remote_backend.exe
             asset_name: hcs_vista_remote_backend.exe
             cmd: build-binary-win

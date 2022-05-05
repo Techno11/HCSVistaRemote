@@ -31,7 +31,7 @@
     "iohook": "^0.6.6",
     "pkg": "^5.6.0",
     "prompt-sync": "^4.2.0",
-    "robotjs": "git+https://github.com/octalmage/robotjs.git",
+    "robotjs": "git+https://github.com/octalmage/robotjs.git#master",
     "serialport": "^10.4.0",
     "socket.io": "^4.4.1",
     "typescript": "^4.6.3"
