@@ -5,6 +5,12 @@ const AuthEvents = (client: Socket, connManager: ConnectionManager, clientAuthSt
   const ua = client.request.headers["user-agent"];
   const ip = client.handshake.address;
 
+  // Client Disconnects
+  client.on('disconnect', () => {
+    connManager.onDisconnect(clientAuthString.code);
+    client.disconnect();
+  });
+
   // Client can check if they're authed
   client.on('authed', () => {
     client.emit('authed-response', {auth: connManager.isAuthed(clientAuthString.code, ua, ip)});
@@ -20,10 +26,10 @@ const AuthEvents = (client: Socket, connManager: ConnectionManager, clientAuthSt
     }
   })
 
-  // client submitting their auth toke for verification
+  // client submitting their auth token for verification
   client.on('auth', (code) => {
     if (ua) {
-      const authed = connManager.onAuth(code, ua, ip);
+      const authed = connManager.onAuth(code, ua, ip, client);
       if (authed) {
         clientAuthString.code = code;
         client.emit('auth-response', {auth: true})

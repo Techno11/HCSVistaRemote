@@ -5,6 +5,7 @@ import "./components.css"
 import ZoneStates from "../models/ZoneStates";
 import ZoneState from "../models/ZoneState";
 import IntensitySlider from "./IntensitySlider";
+import WashZone from "../models/WashZone";
 
 interface IProps {
   onChange: (state: ZoneStates) => void,
@@ -15,8 +16,15 @@ export default function WashEditor(props: IProps) {
 
   const {onChange, value: zoneStates} = props;
 
-  const [activeButton, setActiveButton] = useState<keyof typeof zoneStates>("wash")
+  const [activeButton, setActiveButton] = useState<WashZone>("wash")
 
+  /**
+   * Calculate the SX prop of a wash button
+   * @param state state of the zone this button represents
+   * @param first if this is the first button of the row
+   * @param activeBtn if this is the active button
+   * activeBtn must be passed in so as a prop so this is triggered on state changes
+   */
   const iconButtonSx = (state: ZoneState, first: boolean, activeBtn: keyof typeof zoneStates) => {
     const eightBitIntensity = (state.intensity / 100) * 255;
     const whiteBlack = eightBitIntensity > 127 ? 'black' : 'white';
@@ -29,21 +37,42 @@ export default function WashEditor(props: IProps) {
     })
   }
 
-  const onClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, btn: keyof typeof zoneStates) => {
+  /**
+   * Handle onClick event of a wash button
+   * @param e click event
+   * @param btn what button is being clicked
+   */
+  const onClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, btn: WashZone) => {
     e.preventDefault();
-    setActiveButton(btn);
-    const newState = {...zoneStates[btn]};
-    newState.enabled = !newState.enabled;
+    // Copy state
+    const newState = {...zoneStates[btn]}
     const newStates = {...zoneStates};
-    newStates[btn] = newState;
-    onChange(newStates);
+    // Only toggle on/off if this is already the active button
+    if(activeButton === btn) {
+      // Invert state
+      newState.enabled = !newState.enabled;
+      // Update copy
+      newStates[btn] = newState;
+      // Emit change emitter (only when there is a change)
+      onChange(newStates);
+    }
+    // Update active button
+    setActiveButton(btn);
   }
 
+  /**
+   * Handle the slide event of the wash
+   * @param intensity
+   */
   const onSlide = (intensity: number | number[]) => {
+    // Make sure we're getting the correct data
     if (Array.isArray(intensity)) intensity = intensity[0] ?? 100;
+    // Copy STate
     const newState = {...zoneStates[activeButton], intensity};
     const newStates = {...zoneStates};
+    // Update State
     newStates[activeButton] = newState;
+    // Emit change emitter
     onChange(newStates);
   }
 

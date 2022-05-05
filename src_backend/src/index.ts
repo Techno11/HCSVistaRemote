@@ -48,11 +48,6 @@ io.on('connection', async (client: Socket) => {
   // Register Setup Events
   SetupEvents(client, connManager, screenMachine, vistaSerial, clientAuthString);
 
-  client.on('disconnect', () => {
-    connManager.onDisconnect(clientAuthString.code);
-    client.disconnect();
-  });
-
   client.on('drip', () => {
     client.emit('drop');
   });

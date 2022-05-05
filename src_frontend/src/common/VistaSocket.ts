@@ -144,4 +144,18 @@ export default class VistaSocket {
       this._socket.emit("get-building");
     })
   }
+
+  /**
+   * Remove all listeners for the board-update event
+   */
+  public unregisterBoardEvent() {
+    this._socket.off("board-update");
+  }
+
+  /**
+   * Add a listener for the board-update event
+   */
+  public registerBoardEvent(listener: (args: any) => void) {
+    this._socket.on("board-update", listener);
+  }
 }

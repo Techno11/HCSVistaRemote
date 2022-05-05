@@ -13,6 +13,9 @@ import ZoneState from "../models/ZoneState";
 import ZoneStates from "../models/ZoneStates";
 import BuildingBoard from "../models/BuildingBoard";
 import BoxTitle from "./BoxTitle";
+import {CuestackType} from "../models/Cuestack";
+import Wash from "../models/Wash";
+import WashZone from "../models/WashZone";
 
 const initialWashState = {
   z1: {enabled: false, intensity: 100, name: "z1"} as ZoneState,
@@ -64,7 +67,46 @@ export default function Queuer() {
   useEffect(() => {
     // Get our board type from the server
     vista.getBuilding().then(b => setBoardType(b));
+
+    // Add a new listener to update state
+    vista.registerBoardEvent(cues => {
+      interpretCues(cues);
+    });
   }, [])
+
+  /**
+   * Take an array of cues (presumably fired from somewhere else) and translate them into our state
+   * @param cues
+   */
+  const interpretCues = (cues: CuestackTrigger[]) => {
+    for(const cue of cues) {
+      switch(cue.cuestack.type){
+        case CuestackType.Cyc:
+          setCycLive({color: cue.cuestack.cuestack_data as Color, intensity: cue.intensity})
+          break;
+        case CuestackType.Stage:
+          setStageLive({color: cue.cuestack.cuestack_data as Color, intensity: cue.intensity})
+          break;
+        case CuestackType.Truss:
+          setTrussLive({color: cue.cuestack.cuestack_data as Color, intensity: cue.intensity})
+          break;
+        case CuestackType.Wash:
+          // Calculate whether this is to be enabled or not
+          const name = cue.cuestack.cuestack_data as WashZone
+          // Create a copy of the current state
+          const newZoneStates = {...washLive};
+          // Update intensity
+          newZoneStates[name].intensity = cue.intensity
+          // If we're not just updating intensity, we're toggling the state
+          if(cue.mode !== CuestackTriggerMode.INTENSITY) {
+            newZoneStates[name].enabled = cue.mode === CuestackTriggerMode.PLAY;
+          }
+          // Update State
+          setWashLive(newZoneStates)
+          break;
+      }
+    }
+  }
 
   /**
    * Toggle live state. If we're in live going back to preview, we take our "live" state with us

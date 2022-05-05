@@ -1,10 +1,13 @@
 // Connection manager is a primative memory database that manages how many connections once connection code can have
 
+import {Socket} from "socket.io";
+
 interface ClientAuth {
   authenticated: boolean,
   user_agent: string,
   ip: string,
   timeout: NodeJS.Timeout,
+  socket?: Socket
 }
 
 class ConnectionManager {
@@ -29,11 +32,14 @@ class ConnectionManager {
    * @param code Connection code
    * @param userAgent Connection user agent
    * @param ip Connection ip address
+   * @param client Socket of authenticating user
    */
-  public onAuth(code: string, userAgent: string, ip: string): boolean {
+  public onAuth(code: string, userAgent: string, ip: string, client: Socket): boolean {
     if(this.connections[code] && this.connections[code].user_agent === userAgent && this.connections[code].ip === ip) {
       // Mark Connection as connected
       this.connections[code].authenticated = true;
+      // Update Socket
+      this.connections[code].socket = client;
       // Clear Timeout
       if(this.connections[code].timeout) clearTimeout(this.connections[code].timeout);
       return true;
@@ -85,6 +91,27 @@ class ConnectionManager {
       out += chars[Math.round(Math.random() * (chars.length - 1))];
     }
     return out;
+  }
+
+  /**
+   * Emit a payload to all authed clients
+   * @param event Event key
+   * @param payload Payload to send
+   * @param exclude A socket ID to exclude
+   */
+  public emitToAuthedClients(event: string, payload?: any, exclude?: string) {
+    for(const key in this.connections) {
+      // Has Own Property Check
+      if(!this.connections.hasOwnProperty(key)) continue;
+      // Introduce shorthand
+      const currentConn = this.connections[key];
+      // If we have no socket, we cannot emit
+      if(!currentConn.socket) continue;
+      // if this ID is excluded, we don't emit
+      if(exclude &&  currentConn.socket.id === exclude) continue;
+      // emit event
+      currentConn.socket.emit(event, payload);
+    }
   }
 }
 

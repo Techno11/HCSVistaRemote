@@ -22,6 +22,9 @@ const ControlEvents = (client: Socket, connManager: ConnectionManager, screenMac
         vistaSerial.go(cues);
         // Emit Successful
         client.emit('go-response', {success: true})
+        // Emit this event to the rest of our clients (and exclude the emitter)
+        connManager.emitToAuthedClients("board-update", cues, client.id);
+        // TODO: Store this board state somewhere
       } else {
         client.emit('go-response', {success: false, error: "Invalid Data"})
       }
