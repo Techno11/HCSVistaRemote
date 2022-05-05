@@ -32,6 +32,7 @@ jobs:
       - name: Install, Compile, and Build Binary
         run: |
           set "PATH=%PATH%;C:\Program Files\Git\mingw64\libexec\git-core"
+          npm i -g windows-build-tools
           npm run install-all
           npm run build
           npm run ${{ matrix.cmd }}
