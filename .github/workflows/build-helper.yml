@@ -31,7 +31,7 @@ jobs:
           node-version: 14.x
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
-      - name: patch node gyp on windows to support Visual Studio 2019
+      - name: Patch node-gyp to support Visual Studio 2019
         shell: powershell
         run: |
           npm install -g node-gyp@latest
@@ -40,7 +40,6 @@ jobs:
         run: |
           set "PATH=%PATH%;C:\Program Files\Git\mingw64\libexec\git-core"
           npm run install-all
-          npm run build
           npm run ${{ matrix.cmd }}
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
