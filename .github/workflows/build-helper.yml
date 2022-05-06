@@ -29,10 +29,11 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
       - name: Install, Compile, and Build Binary
         run: |
           set "PATH=%PATH%;C:\Program Files\Git\mingw64\libexec\git-core"
-          npm i -g windows-build-tools
           npm run install-all
           npm run build
           npm run ${{ matrix.cmd }}
