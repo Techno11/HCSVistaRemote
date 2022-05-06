@@ -1,0 +1,58 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-test-backend:
+    name: Backend Build & Tests
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: ./src_backend
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Patch node-gyp to support Visual Studio 2019
+        shell: powershell
+        run: |
+          npm install -g node-gyp@latest
+          npm prefix -g | % {npm config set node_gyp "$_\node_modules\node-gyp\bin\node-gyp.js"}
+      - name: Install, Compile, and Build Binary
+        run: |
+          set "PATH=%PATH%;C:\Program Files\Git\mingw64\libexec\git-core"
+          npm i
+          npm run build
+          npm run test
+
+  build-test-frontend:
+    name: Frontend Build & Tests
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: ./src_frontend
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: Install, Compile, and Build Binary
+        run: |
+          npm i
+          npm run build
+          npm run test

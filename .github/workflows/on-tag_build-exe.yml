@@ -1,4 +1,4 @@
-name: Build Helper
+name: Build Executable
 
 on:
   push:
