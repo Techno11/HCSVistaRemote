@@ -28,7 +28,7 @@ jobs:
         run: |
           npm install -g node-gyp@latest
           npm prefix -g | % {npm config set node_gyp "$_\node_modules\node-gyp\bin\node-gyp.js"}
-      - name: Install, Compile, and Build Binary
+      - name: Install, Build, and Test Backend
         run: |
           set "PATH=%PATH%;C:\Program Files\Git\mingw64\libexec\git-core"
           npm i
@@ -51,7 +51,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
-      - name: Install, Compile, and Build Binary
+      - name: Install, Build, and Test Frontend
         run: |
           npm i
           npm run build
