@@ -1,9 +1,14 @@
 import * as React from 'react';
-import {Box, Button, ButtonGroup, LinearProgress, TextField, Typography} from "@mui/material";
-import {useState} from "react";
-import {useVista} from "../hooks/useVista";
+import { Button, ButtonGroup } from "@mui/material";
 import Color from "../models/Color";
-import {getPOTYCss, getRainbowCssString, getRedBlueCss} from "../constants/CssHelpers";
+import {
+  getBlueGreenCss, getBRGPYCss, getOTYCss,
+  getPOTYCss,
+  getPurpleOrangeCss,
+  getRainbowCssString, getRainbowCssStringReverse,
+  getRedBlueCss, getRedOrangeCss, getRWBCss,
+  getTealPurpleCss
+} from "../constants/CssHelpers";
 
 interface IProps {
   onClick: (color: Color) => void,
@@ -27,31 +32,40 @@ export function ColorButton({onClick, currentColor, desiredColor, text}: IProps)
     desiredColor === Color.WHITE ? { bg: 'white', fg: 'black', border: 'black' } :
     desiredColor === Color.OFF ? { bg: 'black', fg: 'white', border: 'lightgrey' } :
     desiredColor === Color.RAINBOW ? { bg: getRainbowCssString(), fg: 'white', border: 'black' } :
+    desiredColor === Color.ROYGBIV ? { bg: getRainbowCssStringReverse(), fg: 'white', border: 'black' } :
     desiredColor === Color.RB ? { bg: getRedBlueCss(), fg: 'white', border: 'black' } :
     desiredColor === Color.TWINKLE ? { bg: 'gray', fg: 'white', border: 'black' } :
-    desiredColor === Color.ROYGBIV ? { bg: 'gray', fg: 'white', border: 'black' } :
     desiredColor === Color.SPAZZY ? { bg: 'gray', fg: 'white', border: 'black' } :
     desiredColor === Color.RSPAZZY ? { bg: 'red', fg: 'white', border: 'black' } :
     desiredColor === Color.GSPAZZY ? { bg: 'green', fg: 'white', border: 'black' } :
     desiredColor === Color.BSPAZZY ? { bg: 'blue', fg: 'white', border: 'black' } :
     desiredColor === Color.PSPAZZY ? { bg: 'purple', fg: 'white', border: 'black' } :
     desiredColor === Color.POTY ? { bg: getPOTYCss(), fg: 'white', border: 'black' } :
+    desiredColor === Color.PO ? { bg: getPurpleOrangeCss(), fg: 'white', border: 'black' } :
+    desiredColor === Color.TP ? { bg: getTealPurpleCss(), fg: 'white', border: 'black' } :
+    desiredColor === Color.BG ? { bg: getBlueGreenCss(), fg: 'white', border: 'black' } :
+    desiredColor === Color.RO ? { bg: getRedOrangeCss(), fg: 'white', border: 'black' } :
+    desiredColor === Color.OPY ? { bg: getOTYCss(), fg: 'white', border: 'black' } :
+    desiredColor === Color.BRGPY ? { bg: getBRGPYCss(), fg: 'white', border: 'black' } :
+    desiredColor === Color.RWB ? { bg: getRWBCss(), fg: 'black', border: 'black' } :
                                   { bg: 'grey', fg: 'white', border: 'black' };
 
   const onColorChange = (event: React.MouseEvent<HTMLAnchorElement> | React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    onClick(desiredColor);
+    // If button exists/isn't disabled
+    if(text !== "N/A") onClick(desiredColor);
   }
   return (
     <Button
       size={"small"}
-      disabled={currentColor === desiredColor}
+      disabled={currentColor === desiredColor || text === "N/A"}
       sx={{
         background: colors.bg,
         color: colors.fg,
+        width: "100%",
         border: (currentColor === desiredColor) ? `4px solid ${colors.border} !important` : "4px solid rgba(0, 0, 0, 0)"
       }}
-      onClick={(e) => onColorChange(e)}
+      onClick={onColorChange}
     >
       {text}
     </Button>

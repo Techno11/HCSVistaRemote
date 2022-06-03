@@ -25,7 +25,7 @@ export default function IntensitySlider({onChange, value, labels}: IProps) {
 
   return (
     <Grid container sx={{height: '100%'}} direction={'column'}>
-      <Grid item xs={11} sx={{height: '100%', pb: 2}}>
+      <Grid item sx={{height: '90%', pb: 2}}>
         <Slider
           sx={{height: '100%', mt: 1}}
           orientation="vertical"

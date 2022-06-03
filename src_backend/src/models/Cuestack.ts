@@ -3,7 +3,7 @@ import Color from "./Color";
 import BO from "./BO";
 
 type Cuestack = {
-  console: 1 | 2 | 3 | 4,
+  console: -1 | 1 | 2 | 3 | 4,
   position: number
   name: string
   number: number

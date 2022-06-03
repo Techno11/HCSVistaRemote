@@ -7,14 +7,16 @@ import BOType from "../models/BO";
 import BO from "../models/BO";
 import Console from "../models/Console"
 import {CuestackType} from "../models/Cuestack";
+import BuildingBoard from "../models/BuildingBoard";
 
 interface IProps {
   onBo: () => void
+  building: BuildingBoard
   buildingConsole: () => Console
 }
 
 
-export default function AlwaysLiveRow({onBo, buildingConsole}: IProps) {
+export default function AlwaysLiveRow({onBo, buildingConsole, building}: IProps) {
 
   const vista = useVista();
 
@@ -22,6 +24,7 @@ export default function AlwaysLiveRow({onBo, buildingConsole}: IProps) {
   const [house, setHouse] = useState<number>(0);
   const [baby, setBaby] = useState<boolean>(false);
   const [wash, setWash] = useState<boolean>(false);
+  const [bricks, setBricks] = useState<boolean>(false);
   const [boCut, setBoCut] = useState<boolean>(false);
   const [bo2, setBo2] = useState<boolean>(false);
   const [bo5, setBo5] = useState<boolean>(false);
@@ -109,7 +112,7 @@ export default function AlwaysLiveRow({onBo, buildingConsole}: IProps) {
   }
 
   /**
-   * Go Baby Light
+   * Go Baby Lights
    * @param e Click event
    */
   const goBaby = (e: React.MouseEvent<HTMLAnchorElement> | React.MouseEvent<HTMLButtonElement>) => {
@@ -121,6 +124,22 @@ export default function AlwaysLiveRow({onBo, buildingConsole}: IProps) {
       vista.go([{intensity: 100, mode: CuestackTriggerMode.PLAY, cuestack: buildingConsole().board.BABY}]).then(success => setBaby(success))
     } else {
       vista.go([{intensity: 100, mode: CuestackTriggerMode.RELEASE, cuestack: buildingConsole().board.BABY}]).then(success => setBaby(!success))
+    }
+  }
+
+  /**
+   * Go Bricks
+   * @param e Click event
+   */
+  const goBricks = (e: React.MouseEvent<HTMLAnchorElement> | React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent the button from taking focus
+    e.preventDefault();
+
+    // Play the baby lights if it isn't, otherwise, release it
+    if(!bricks) {
+      vista.go([{intensity: 100, mode: CuestackTriggerMode.PLAY, cuestack: buildingConsole().board.BRICKS}]).then(success => setBricks(success))
+    } else {
+      vista.go([{intensity: 100, mode: CuestackTriggerMode.RELEASE, cuestack: buildingConsole().board.BRICKS}]).then(success => setBricks(!success))
     }
   }
 
@@ -161,9 +180,12 @@ export default function AlwaysLiveRow({onBo, buildingConsole}: IProps) {
       {/* House / Wash Button Group */}
       <Grid item>
         <ButtonGroup orientation={'horizontal'} sx={{width: "100%"}}>
-          <Button size={'large'} variant={'contained'} onClick={(e) => goHouse(e)}>{house < 1 ? "House Full" : house < 2 ? "House Half" : "Release House"}</Button>
-          <Button size={'large'} variant={'contained'} onClick={(e) => goWash(e)}>{!wash ? "Wash 100" : "Release Wash"}</Button>
-          <Button size={'large'} variant={'contained'} onClick={(e) => goBaby(e)}>{!baby ? "Baby Lights" : "Release Baby Lights"}</Button>
+          <Button size={'large'} variant={'contained'} onClick={goHouse}>{house < 1 ? "House Full" : house < 2 ? "House Half" : "Release House"}</Button>
+          <Button size={'large'} variant={'contained'} onClick={goWash}>{!wash ? "Wash 100" : "Release Wash"}</Button>
+          <Button size={'large'} variant={'contained'} onClick={goBaby}>{!baby ? "Baby Lights" : "Release Baby Lights"}</Button>
+          {building === BuildingBoard.PAC &&
+            <Button size={'large'} variant={'contained'} onClick={goBricks}>{!bricks ? "Bricks" : "Release Bricks"}</Button>
+          }
         </ButtonGroup>
       </Grid>
 

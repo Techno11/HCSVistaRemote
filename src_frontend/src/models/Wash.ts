@@ -3,6 +3,8 @@ enum WashType {
   DS_CENTER = "DsSp",
   MS_CENTER = "MsSp",
   US_CENTER = "UsSp",
+  SL_CENTER = "SlSp",
+  APRON = "Apron",
   Z1 = "z1",
   Z2 = "z2",
   Z3 = "z3",

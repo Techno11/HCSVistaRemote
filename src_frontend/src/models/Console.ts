@@ -8,6 +8,8 @@ type Console = {
   stage: (color: Color) => Cuestack,
   wash: (zone: WashZone) => Cuestack,
   bo: (mode: BOType) => Cuestack,
+  truss?: (color: Color) => Cuestack,
+  mover?: (color: Color) => Cuestack,
   board: Board
 }
 

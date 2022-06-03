@@ -11,6 +11,8 @@ type WashZone =
   "UsSp" |
   "MsSp" |
   "DsSp" |
+  "SlSp" |
+  "Apron" |
   "wash";
 
 export default WashZone;

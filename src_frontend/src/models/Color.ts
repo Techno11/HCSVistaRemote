@@ -19,7 +19,15 @@ enum Color {
   BSPAZZY,
   GSPAZZY,
   PSPAZZY,
-  POTY
+  POTY,
+  RO,
+  BG,
+  OPY,
+  BRGPY,
+  RWB,
+  SPECIAL,
+  PO,
+  TP
 }
 
 

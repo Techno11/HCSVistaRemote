@@ -6,15 +6,17 @@ import ZoneStates from "../models/ZoneStates";
 import ZoneState from "../models/ZoneState";
 import IntensitySlider from "./IntensitySlider";
 import WashZone from "../models/WashZone";
+import BuildingBoard from "../models/BuildingBoard";
 
 interface IProps {
   onChange: (state: ZoneStates) => void,
   value: ZoneStates
+  board: BuildingBoard
 }
 
 export default function WashEditor(props: IProps) {
 
-  const {onChange, value: zoneStates} = props;
+  const {onChange, value: zoneStates, board} = props;
 
   const [activeButton, setActiveButton] = useState<WashZone>("wash")
 
@@ -25,7 +27,7 @@ export default function WashEditor(props: IProps) {
    * @param activeBtn if this is the active button
    * activeBtn must be passed in so as a prop so this is triggered on state changes
    */
-  const iconButtonSx = (state: ZoneState, first: boolean, activeBtn: keyof typeof zoneStates) => {
+  const iconButtonSx = (state: ZoneState, first: boolean, activeBtn: WashZone) => {
     const eightBitIntensity = (state.intensity / 100) * 255;
     const whiteBlack = eightBitIntensity > 127 ? 'black' : 'white';
     return ({
@@ -80,12 +82,14 @@ export default function WashEditor(props: IProps) {
     <>
       <Grid container direction={'row'} sx={{height: '100%'}}>
         <Grid item xs={10}>
-          {/* Zones 7-9 */}
-          <div style={{marginBottom: "10px", textAlign: "center"}}>
-            <IconButton onClick={e => onClick(e, "z7")} sx={iconButtonSx(zoneStates.z7, true, activeButton)} >Z7</IconButton>
-            <IconButton onClick={e => onClick(e, "z8")} sx={iconButtonSx(zoneStates.z8, false, activeButton)}>Z8</IconButton>
-            <IconButton onClick={e => onClick(e, "z9")} sx={iconButtonSx(zoneStates.z9, false, activeButton)}>Z9</IconButton>
-          </div>
+          {/* Zones 7-9 (Only at HS) */}
+          {board === BuildingBoard.HHS &&
+            <div style={{marginBottom: "10px", textAlign: "center"}}>
+              <IconButton onClick={e => onClick(e, "z7")} sx={iconButtonSx(zoneStates.z7, true, activeButton)} >Z7</IconButton>
+              <IconButton onClick={e => onClick(e, "z8")} sx={iconButtonSx(zoneStates.z8, false, activeButton)}>Z8</IconButton>
+              <IconButton onClick={e => onClick(e, "z9")} sx={iconButtonSx(zoneStates.z9, false, activeButton)}>Z9</IconButton>
+            </div>
+          }
 
           {/* Upstage Special */}
           <div style={{marginBottom: "10px", textAlign: "center"}}>
@@ -111,10 +115,19 @@ export default function WashEditor(props: IProps) {
             <IconButton onClick={e => onClick(e, "z3")} sx={iconButtonSx(zoneStates.z3, false, activeButton)}>Z3</IconButton>
           </div>
 
-          {/* Upstage Special */}
-          <div style={{marginBottom: "10px", textAlign: "center"}}>
-            <IconButton onClick={e => onClick(e, "DsSp")} sx={iconButtonSx(zoneStates.DsSp, true, activeButton)}>DS SP</IconButton>
-          </div>
+          {/* Downstage Special (Only at HS) */}
+          {board === BuildingBoard.HHS &&
+            <div style={{marginBottom: "10px", textAlign: "center"}}>
+              <IconButton onClick={e => onClick(e, "DsSp")} sx={iconButtonSx(zoneStates.DsSp, true, activeButton)}>DS SP</IconButton>
+            </div>
+          }
+
+          {/* Apron (Only at PAC) */}
+          {board === BuildingBoard.PAC &&
+            <div style={{marginBottom: "10px", textAlign: "center"}}>
+              <IconButton onClick={e => onClick(e, "Apron")} sx={iconButtonSx(zoneStates.Apron, true, activeButton)}>Apron</IconButton>
+            </div>
+          }
 
           {/* Wash */}
           <div style={{marginBottom: "10px", textAlign: "center"}}>

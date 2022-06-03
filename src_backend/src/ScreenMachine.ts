@@ -84,6 +84,8 @@ class ScreenMachine {
    */
   public go(commands: CuestackTrigger[]) {
     for(const command of commands) {
+      // If the console or position is -1, we don't have a physical board for it
+      if(command.cuestack.console === -1 || command.cuestack.position === -1) continue;
       const board = command.cuestack.console - 1;
       const boardPos = command.cuestack.position;
       const intensity = command.intensity;

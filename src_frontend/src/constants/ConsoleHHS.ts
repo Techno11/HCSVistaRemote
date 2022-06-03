@@ -145,6 +145,7 @@ function wash(zone: WashZone): Cuestack {
     case "MsSp": return board.MS_CTR;
     case "DsSp": return board.DS_CTR;
     case "wash": return board.WASH;
+    default: return {} as Cuestack;
   }
 }
 

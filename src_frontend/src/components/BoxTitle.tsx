@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Typography} from "@mui/material";
+import {Box, Typography} from "@mui/material";
 import Color from "../models/Color";
 import {ReactNode} from "react";
 
@@ -21,9 +21,9 @@ export default function BoxTitle({title, children}: IProps) {
       <Typography variant={"h4"} sx={{textAlign: "center"}}><b>{title}</b></Typography>
 
       {/* Children */}
-      <div style={{border: "2px solid grey", padding: "10px 10px 10px 10px", borderRadius: '10px'}}>
+      <Box sx={{border: "2px solid grey", padding: 1, borderRadius: '10px'}}>
         {children}
-      </div>
+      </Box>
     </div>
   );
 }

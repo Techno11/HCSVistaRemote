@@ -23,13 +23,12 @@ const centerFaderVerticalOffset = -3;
 const faderHeight = 76;
 
 
-class E2AConsole implements ConsoleBase {
+export default class M1Console implements ConsoleBase {
   public x: number;
   public y: number;
 
   private faderStates = [
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1
   ]
 
   constructor(x: number, y: number) {
@@ -42,8 +41,7 @@ class E2AConsole implements ConsoleBase {
    */
   public assumeAll100() {
     this.faderStates = [
-      100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
-      100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
+      100, 100, 100, 100, 100
     ]
   }
 
@@ -52,20 +50,8 @@ class E2AConsole implements ConsoleBase {
    * @param fader fader to set, 0-indexed
    */
   private getFaderPos(fader: number): {x: number, y: number} {
-    let realX: number, realY: number;
-    if(fader < 5) {
-      realX = this.x + (horizontalFaderOnCenterDistance * fader);
-      realY = this.y;
-    } else if (fader < 10) {
-      realX = this.x + (horizontalFaderOnCenterDistance * (fader - 1)) + horizontalFaderBankEndFaderDistance;
-      realY = this.y;
-    } else if (fader < 15) {
-      realX = this.x + (horizontalFaderOnCenterDistance * (fader - 10));
-      realY = this.y + verticalFaderBankOnCenterDistance;
-    } else {
-      realX = this.x + (horizontalFaderOnCenterDistance * (fader - 11)) + horizontalFaderBankEndFaderDistance;
-      realY = this.y + verticalFaderBankOnCenterDistance;
-    }
+    const realX = this.x + (horizontalFaderOnCenterDistance * fader);
+    const realY = this.y;
     return {x: realX, y: realY};
   }
 
@@ -179,5 +165,3 @@ class E2AConsole implements ConsoleBase {
     }
   }
 }
-
-export default E2AConsole;

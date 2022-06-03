@@ -4,7 +4,7 @@ import {Box, Button, ButtonGroup, Grid, Typography} from "@mui/material";
 import Color from "../models/Color";
 import CuestackTrigger, {CuestackTriggerMode} from "../models/CuestackTrigger";
 import HHS from "../constants/ConsoleHHS"
-import PAC from "../constants/ConsoleHHS"
+import PAC from "../constants/ConsolePAC"
 import {useVista} from "../hooks/useVista";
 import ColorSelector, {ColorChange} from "./ColorSelector";
 import AlwaysLiveRow from "./AlwaysLiveRow";
@@ -17,7 +17,7 @@ import {CuestackType} from "../models/Cuestack";
 import Wash from "../models/Wash";
 import WashZone from "../models/WashZone";
 
-const initialWashState = {
+const initialWashStateHHS = {
   z1: {enabled: false, intensity: 100, name: "z1"} as ZoneState,
   z2: {enabled: false, intensity: 100, name: "z2"} as ZoneState,
   z3: {enabled: false, intensity: 100, name: "z3"} as ZoneState,
@@ -30,6 +30,20 @@ const initialWashState = {
   UsSp: {enabled: false, intensity: 100, name: "UsSp"} as ZoneState,
   MsSp: {enabled: false, intensity: 100, name: "MsSp"} as ZoneState,
   DsSp: {enabled: false, intensity: 100, name: "DsSp"} as ZoneState,
+  wash: {enabled: false, intensity: 100, name: "wash"} as ZoneState
+};
+
+const initialWashStatePAC = {
+  z1: {enabled: false, intensity: 100, name: "z1"} as ZoneState,
+  z2: {enabled: false, intensity: 100, name: "z2"} as ZoneState,
+  z3: {enabled: false, intensity: 100, name: "z3"} as ZoneState,
+  z4: {enabled: false, intensity: 100, name: "z4"} as ZoneState,
+  z5: {enabled: false, intensity: 100, name: "z5"} as ZoneState,
+  z6: {enabled: false, intensity: 100, name: "z6"} as ZoneState,
+  UsSp: {enabled: false, intensity: 100, name: "UsSp"} as ZoneState,
+  MsSp: {enabled: false, intensity: 100, name: "MsSp"} as ZoneState,
+  SlSp: {enabled: false, intensity: 100, name: "SlSp"} as ZoneState,
+  Apron: {enabled: false, intensity: 100, name: "Apron"} as ZoneState,
   wash: {enabled: false, intensity: 100, name: "wash"} as ZoneState
 };
 
@@ -53,9 +67,13 @@ export default function Queuer() {
   const [trussLive, setTrussLive] = useState<ColorChange>({color: Color.OFF, intensity: 100});
   const [trussPreview, setTrussPreview] = useState<ColorChange>({color: Color.OFF, intensity: 100});
 
+  // Movers
+  const [moversLive, setMoversLive] = useState<ColorChange>({color: Color.OFF, intensity: 100, spazzy: false});
+  const [moversPreview, setMoversPreview] = useState<ColorChange>({color: Color.OFF, intensity: 100, spazzy: false});
+
   // Wash
-  const [washPreview, setWashPreview] = useState<ZoneStates>(initialWashState)
-  const [washLive, setWashLive] = useState<ZoneStates>(initialWashState)
+  const [washPreview, setWashPreview] = useState<ZoneStates>(boardType === BuildingBoard.PAC ? initialWashStatePAC : initialWashStateHHS)
+  const [washLive, setWashLive] = useState<ZoneStates>(boardType === BuildingBoard.PAC ? initialWashStatePAC : initialWashStateHHS)
 
   // Are we editing live?
   const [live, setLive] = useState<boolean>(false);
@@ -156,7 +174,7 @@ export default function Queuer() {
   }
 
   /**
-   * Update stage-wash state when the stage-wash selector is changed
+   * Update truss state when the truss selector is changed
    * @param val New state
    */
   const onTrussChange = (val: ColorChange) => {
@@ -165,6 +183,19 @@ export default function Queuer() {
       goCues(calculateTrussCues(val));
     } else {
       setTrussPreview(val);
+    }
+  }
+
+  /**
+   * Update mover state when the mover selector is changed
+   * @param val New state
+   */
+  const onMoverChange = (val: ColorChange) => {
+    if(live) {
+      setMoversLive(val);
+      goCues(calculateMoverCues(val));
+    } else {
+      setMoversPreview(val);
     }
   }
 
@@ -207,14 +238,16 @@ export default function Queuer() {
     // Reset preview states
     setCycPreview({color: Color.OFF, intensity: 100});
     setStagePreview({color: Color.OFF, intensity: 100});
-    setTrussPreview({color: Color.OFF, intensity: 100});
-    setWashPreview(initialWashState);
+    setTrussPreview({color: Color.OFF, intensity: 100, spazzy: false});
+    setMoversPreview({color: Color.OFF, intensity: 100, spazzy: false});
+    setWashPreview(boardType === BuildingBoard.PAC ? initialWashStatePAC : initialWashStateHHS);
 
     // Reset live states
     setCycLive({color: Color.OFF, intensity: 100});
     setStageLive({color: Color.OFF, intensity: 100});
-    setTrussLive({color: Color.OFF, intensity: 100});
-    setWashLive(initialWashState);
+    setTrussLive({color: Color.OFF, intensity: 100, spazzy: false});
+    setMoversLive({color: Color.OFF, intensity: 100, spazzy: false});
+    setWashLive(boardType === BuildingBoard.PAC ? initialWashStatePAC : initialWashStateHHS);
   }
 
   /**
@@ -238,6 +271,7 @@ export default function Queuer() {
           setStageLive(stagePreview);
           setWashLive(washPreview);
           setTrussLive(trussPreview);
+          setMoversLive(moversPreview);
           setLive(true);
         } else {
           // TODO: Toast failure
@@ -277,7 +311,7 @@ export default function Queuer() {
     if(stageLive.color !== vals.color) {    // Both color changed
       queue.push({
         intensity: vals.intensity,
-        cuestack: buildingConsole().stage(vals.color),
+        cuestack: buildingConsole().stage(vals.color === Color.OFF ? stageLive.color : vals.color),
         mode: vals.color === Color.OFF ? CuestackTriggerMode.RELEASE : CuestackTriggerMode.PLAY
       });
     } else if (stageLive.color === vals.color && stageLive.intensity !== vals.intensity) { // only intensity changed
@@ -292,22 +326,39 @@ export default function Queuer() {
   }
 
   /**
-   * Calculate the cues needed to achieve the vals truss state
+   * Calculate the cues needed to achieve the desired truss state
    * @param vals the truss state desired to be achieved
    */
   const calculateTrussCues = (vals: ColorChange) => {
     const queue = [] as CuestackTrigger[];
+    const cs = buildingConsole();
+    // If we don't have a truss function configured, ignore
+    if(!cs.truss) return queue;
     if(trussLive.color !== vals.color) {    // Both color changed
       queue.push({
         intensity: vals.intensity,
-        cuestack: buildingConsole().stage(vals.color),
+        cuestack: cs.truss(vals.color === Color.OFF ? trussLive.color : vals.color),
         mode: vals.color === Color.OFF ? CuestackTriggerMode.RELEASE : CuestackTriggerMode.PLAY
       });
     } else if (trussLive.color === vals.color && trussLive.intensity !== vals.intensity) { // only intensity changed
       queue.push({
         intensity: vals.intensity,
-        cuestack: buildingConsole().stage(vals.color),
+        cuestack: cs.truss(vals.color),
         mode: CuestackTriggerMode.INTENSITY
+      });
+    }
+    // Check "Spazzy"
+    if(vals.spazzy && !trussLive.spazzy) {
+      queue.push({
+        intensity: 100,
+        cuestack: cs.truss(Color.SPAZZY),
+        mode: CuestackTriggerMode.PLAY
+      });
+    } else if (!vals.spazzy && trussLive.spazzy) { // Spazzy is on, but is requested to be off
+      queue.push({
+        intensity: 100,
+        cuestack: cs.truss(Color.SPAZZY),
+        mode: CuestackTriggerMode.RELEASE
       });
     }
 
@@ -315,7 +366,47 @@ export default function Queuer() {
   }
 
   /**
-   * Calculate the cues needed to achieve the vals cyc state
+   * Calculate the cues needed to achieve the desired mover state
+   * @param vals the mover state desired to be achieved
+   */
+  const calculateMoverCues = (vals: ColorChange) => {
+    const queue = [] as CuestackTrigger[];
+    const cs = buildingConsole();
+    // If we don't have a truss function configured, ignore
+    if(!cs.mover) return queue;
+    if(trussLive.color !== vals.color) {    // Both color changed
+      queue.push({
+        intensity: vals.intensity,
+        cuestack: cs.mover(vals.color === Color.OFF ? moversLive.color : vals.color),
+        mode: vals.color === Color.OFF ? CuestackTriggerMode.RELEASE : CuestackTriggerMode.PLAY
+      });
+    } else if (moversLive.color === vals.color && moversLive.intensity !== vals.intensity) { // only intensity changed
+      queue.push({
+        intensity: vals.intensity,
+        cuestack: cs.mover(vals.color),
+        mode: CuestackTriggerMode.INTENSITY
+      });
+    }
+    // Check "Spazzy"
+    if(vals.spazzy && !moversLive.spazzy) {
+      queue.push({
+        intensity: 100,
+        cuestack: cs.mover(Color.SPECIAL),
+        mode: CuestackTriggerMode.PLAY
+      });
+    } else if (!vals.spazzy && moversLive.spazzy) { // Spazzy is on, but is requested to be off
+      queue.push({
+        intensity: 100,
+        cuestack: cs.mover(Color.SPECIAL),
+        mode: CuestackTriggerMode.RELEASE
+      });
+    }
+
+    return queue;
+  }
+
+  /**
+   * Calculate the cues needed to achieve the desired cyc state
    * @param vals the cyc state desired to be achieved
    */
    const calculateCycCues = (vals: ColorChange) => {
@@ -323,7 +414,7 @@ export default function Queuer() {
      if(cycLive.color !== vals.color) {    // Both color changed
        queue.push({
          intensity: vals.intensity,
-         cuestack: buildingConsole().cyc(vals.color),
+         cuestack: buildingConsole().cyc(vals.color === Color.OFF ? cycLive.color : vals.color),
          mode: vals.color === Color.OFF ? CuestackTriggerMode.RELEASE : CuestackTriggerMode.PLAY
        });
      } else if (cycLive.color === vals.color && cycLive.intensity !== vals.intensity) { // only intensity changed
@@ -345,12 +436,13 @@ export default function Queuer() {
       ...calculateWashCues(washPreview),
       ...calculateCycCues(cycPreview),
       ...calculateStageCues(stagePreview),
-      ...(boardType === BuildingBoard.PAC ? calculateTrussCues(trussPreview) : [])
+      ...(boardType === BuildingBoard.PAC ? calculateTrussCues(trussPreview) : []),
+      ...(boardType === BuildingBoard.PAC ? calculateMoverCues(moversPreview) : [])
     ];
   }
 
   return (
-    <Grid container direction={'column'} sx={{height: '100vh'}}>
+    <Grid container direction={'column'} sx={{height: '100vh'}} spacing={0}>
 
       {/* Mode Header / Header Buttons */}
       <Grid item>
@@ -364,28 +456,37 @@ export default function Queuer() {
       </Grid>
 
       {/* Cyc / Stage / Truss / Wash Selectors */}
-      <Grid item sx={{maxHeight: "475px"}}>
+      <Grid item sx={{maxHeight: "500px"}}>
         <Grid container direction={'row'} spacing={2} justifyContent={"center"}>
 
           {/* Cyc Selector */}
-          <Grid item xs={3.5} sx={{height: '100%'}}>
+          <Grid item xs={2.8} sx={{height: '100%'}}>
             <BoxTitle title={"Cyc"}>
-              <ColorSelector onChange={(d) => {onCycChange(d)}} value={live ? cycLive : cycPreview} cyc />
+              <ColorSelector onChange={onCycChange} value={live ? cycLive : cycPreview} building={boardType} cyc />
             </BoxTitle>
           </Grid>
 
           {/* Stage Wash Selector */}
-          <Grid item xs={2} sx={{height: '100%'}}>
+          <Grid item xs={1.8} sx={{height: '100%'}}>
             <BoxTitle title={"Stage"}>
-              <ColorSelector onChange={(d) => {onStageChange(d)}} value={live ? stageLive : stagePreview} />
+              <ColorSelector onChange={onStageChange} value={live ? stageLive : stagePreview} building={boardType} />
             </BoxTitle>
           </Grid>
 
           {/* Truss Selector */}
           {boardType === BuildingBoard.PAC && // Only show if the building board is PAC
-            <Grid item xs={2} sx={{height: '100%'}}>
+            <Grid item xs={2.2} sx={{height: '100%'}}>
               <BoxTitle title={"Truss"}>
-                <ColorSelector onChange={(d) => {onTrussChange(d)}} value={live ? trussLive : trussPreview}/>
+                <ColorSelector onChange={onTrussChange} value={live ? trussLive : trussPreview} building={boardType} truss/>
+              </BoxTitle>
+            </Grid>
+          }
+
+          {/* Mover Selector */}
+          {boardType === BuildingBoard.PAC && // Only show if the building board is PAC
+            <Grid item xs={1.8} sx={{height: '100%'}}>
+              <BoxTitle title={"Movers"}>
+                <ColorSelector onChange={onMoverChange} value={live ? moversLive : moversPreview} building={boardType} mover/>
               </BoxTitle>
             </Grid>
           }
@@ -393,7 +494,7 @@ export default function Queuer() {
           {/* Wash Selector */}
           <Grid item xs={3}>
             <BoxTitle title={"Wash"}>
-              <WashEditor onChange={(states) => onWashChange(states)} value={live ? washLive : washPreview}/>
+              <WashEditor onChange={onWashChange} value={live ? washLive : washPreview} board={boardType}/>
             </BoxTitle>
           </Grid>
 
@@ -403,7 +504,7 @@ export default function Queuer() {
       {/* Always Live Row */}
       <Grid item>
         <BoxTitle title={"Always Live"}>
-          <AlwaysLiveRow onBo={() => onBo()} buildingConsole={buildingConsole} />
+          <AlwaysLiveRow onBo={() => onBo()} buildingConsole={buildingConsole} building={boardType} />
         </BoxTitle>
       </Grid>
 
